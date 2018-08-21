@@ -1,0 +1,176 @@
+- Externalized configuration
+- Dependency injection with Spring Core
+- Pebble as template engine
+- Easy to do integration test with a web client library
+- Easy to test with Mockito
+
+# Integration test example
+
+static TestServer server
+UserService service
+
+@BeforeClass
+public static void setUp() {
+  WebApp myApp = Guice.createInjector(new Configuration()).getInstance(MyApplication)
+  myApp.setAuthFilter({ ctx -> ctx.next()} as AuthFilter) # Disable auth for this test
+  server = new TestServer(myApp)
+}
+
+@Before
+public void doSetup() {
+  service = mock(UserService)
+}
+
+void getIndex() {
+  server.createRequest(get('/')).then(response -> ... )
+}
+
+void testUpdateUser() {
+  UserService service = mock(UserService)
+  given(service.save()).willReturn(...)
+  server.module().getUserController().setUserService(service)
+  server.createRequest(post('/users').body(Json.stringify(new UserForm()))).then(response -> ...)
+}
+
+@AftertClass
+static void shutDown() {
+ server.stop() # Delegates to myApp.stop()
+}
+
+# Controller example
+
+class UsersController extends Controller {
+
+  private UserService userService;
+
+  @Inject
+  public UsersController(UserService userService) {
+    this.userService = userService
+  }
+
+  @Override
+  public void routes(RouteRegistry routes) {
+   routes.get().handler(ctx -> ... )
+   routes.get(':id').contentType('application/json').handler(ctx -> ... )
+   routes.get(':id').handler(ctx -> ... )
+   routes.post().handler(ctx -> ... )
+   routes.put(':id').handler(ctx -> ... )
+  }
+
+}
+
+# Interceptor example
+
+class AuthInterceptor implements Middleware {
+
+  @Override
+  void handle(RouteContext ctx) {
+   // Check whatever
+   ctx.next()
+  } 
+
+}
+
+# Main application file
+
+class MyApplication extends WebApp {
+  Auth auth
+  UsersController usersController
+
+  @Inject
+  public MyApplication(Auth auth, UsersController usersController) {
+    this.auth = auth
+    this.usersController = usersController
+  }
+      
+  @Override
+  void routes(RouteRegistry routes) {
+    routes.use(getBean(Auth.class).roles('admin'))
+    routes.useRegex('^\/(?!public|login|logout).*', auth)
+    routes.use('/public/*', new CacheBuster())
+    routes.get('/').handler(ctx -> ctx.sendText('Hello, world!') )
+    routes.controller('/users', usersController)
+    routes.get('*').handler(ctx -> ctx.sendFile('index.html') )
+    routes.get('*', ctx -> ctx.sendFile('index.html')) // I'd like to use this notation
+  }
+
+  @Override
+  void configureServer(ServerConfiguration config) {
+   if(Env.getString('APP_ENV') == 'production') { 
+     config.setCachePeriod(3600)
+     config.setPort(Env.getInt('server.port')) // Default 3000
+   }
+  }
+}
+Cache busting regex: (\/public\/[^\/]+\/)([^\/]+)\.[0-9a-f]+\.(css|js)
+or to get the tail end only: (([^\/]+)\.[0-9a-f]+\.(css|js))$
+The given the following url: /public/css/style.188272ac.css
+Perform: url.replace(pattern, '$2.$3')
+To get: /public/css/style.css
+
+# Reading from the environment
+
+String mode = Env.getString('app.mode') 
+if(Env.getString('app.mode') == 'production')
+int port = Env.getInt('app.port')?: 3000
+
+
+# Testing HTTP requests
+
+## HttpRequestBuilder
+
+get(path: string)
+post(path: string)
+put(path: string)
+delete(path: string)
+query(key: string, value: string)
+cookie(key: string, value: string)
+header(key: string, value: string)
+body(content: string)
+contentType(contentType: string)
+json(body: string) # shortcut for setting the content-type and the JSON body
+-- getters --
+method(): string
+url(): string
+headers(): map - combination of cookies, headers and contentType
+body(): string
+
+## HttpResponse
+
+status: int
+body: string
+headers: string
+url: string
+
+
+# TestServer
+TestServer { host: string, port: int }
+TestServer server = ...
+server.createRequest(get('/').query(string, object).cookie(string, object).header(string, string).body(string)).then(response -> ...)
+
+# Building up routing table
+
+RouteBuilder
+
+get(path: string, cb)
+post(path: string, cb)
+put(path: string, cb)
+delete(path: string, cb)
+use(path: string, cb) # one-off middleware
+use(path: regex, cb) # regex alternative of above
+
+RouteRegistry : RouteBuilder
+
+use(path: string, controller) # mount a subrouter
+
+# Testing
+
+@RunWith(BoltTestRunner)
+BoltApplicationTest<T extends BoltApplication>
+client: HttpClient # Defaults to new HttpClient()
+getApplication(): T
+@BeforeClass static void startApplication()
+@AfterClass static void stopApplication()
+
+
+

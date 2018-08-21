@@ -1,0 +1,25 @@
+plugins {
+  id 'groovy'
+  id 'java'
+}
+
+group 'com.boltframework'
+version '0.0.1'
+
+sourceCompatibility = 1.8
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile group: 'com.google.inject', name: 'guice', version: '4.2.0'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.6'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
+  compile group: 'junit', name: 'junit', version: '4.12'
+  compile group: 'com.mitchellbosecke', name: 'pebble', version: '2.4.0'
+  compile group: 'io.vertx', name: 'vertx-web', version: '3.5.3'
+  compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+  testCompile group: 'org.codehaus.groovy', name: 'groovy', version: '2.5.1'
+  testCompile group: 'org.mockito', name: 'mockito-core', version: '2.21.0'
+}
