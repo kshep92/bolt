@@ -27,6 +27,7 @@ public abstract class BoltApplication implements WebModule {
   private Router router;
   private PebbleEngine pebbleEngine;
   private Logger logger = LoggerFactory.getLogger(getClass());
+  private ReadyState readyState = ReadyState.Stopped;
 
   public ServerConfiguration getServerConfiguration() {
     return serverConfiguration;
@@ -63,7 +64,6 @@ public abstract class BoltApplication implements WebModule {
     ServerConfiguration.StaticFilesConfiguration config = serverConfiguration.getStaticFilesConfiguration();
     staticHandler.setWebRoot(config.getDir()).setMaxAgeSeconds(config.getMaxAge()).setCachingEnabled(config.isCacheEnabled());
     router.get(config.getUrl()).handler(staticHandler);
-    ServerConfiguration.HttpConfiguration httpConfig = serverConfiguration.getHttpConfiguration();
   }
 
   public void start() {
@@ -75,10 +75,15 @@ public abstract class BoltApplication implements WebModule {
     server.requestHandler(router::accept).listen(async -> {
       if(async.succeeded()) {
         logger.info("Listening on {}:{}...", serverOptions.getHost(), serverOptions.getPort());
+        readyState = ReadyState.Running;
       }
       else
+      {
         logger.error("Could not start app: " + async.cause().getMessage());
+        readyState = ReadyState.Error;
+      }
       if(successCallback != null) successCallback.accept(async.succeeded());
+
     });
   }
 
@@ -89,16 +94,26 @@ public abstract class BoltApplication implements WebModule {
   public void stop(Consumer<Boolean> callBack) {
     server.close(async -> {
       logger.info("Closing app...");
+      readyState = ReadyState.Stopped;
+      int status = 0;
       if(async.succeeded()) {
         logger.info("Bye!");
         if(callBack != null) callBack.accept(async.succeeded());
-        System.exit(0);
       }
       else {
         logger.error("Uh oh... " + async.cause().getMessage());
         if(callBack != null) callBack.accept(async.succeeded());
-        System.exit(500);
+        status = 500;
       }
+      System.exit(status);
     });
+  }
+
+  public ReadyState getReadyState() {
+    return readyState;
+  }
+
+  public enum ReadyState {
+    Stopped, Running, Error
   }
 }

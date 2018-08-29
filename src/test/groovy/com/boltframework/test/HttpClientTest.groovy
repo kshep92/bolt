@@ -17,27 +17,10 @@ import static com.boltframework.utils.httpclient.HttpRequest.*
 public class HttpClientTest extends BoltApplicationTest<MyApp> {
 
   protected Logger logger = LoggerFactory.getLogger(getClass())
-  protected static Boolean started = false
-
-  @Before
-  public void startServer() throws Exception {
-    if(started) return
-    started = true
-    logger.debug("Started application")
-  }
-
-  static void stopServer() {
-
-  }
-
-  @Before
-  public void setUpAgain() throws Exception {
-    logger.debug('Running the second method')
-  }
 
   @Test
   public void 'send GET request'() {
-    client.createRequest(get('/')).then({
+    http.createRequest(get('/')).then({
       assertEquals(200, it.status)
       assertEquals('get', it.body)
     })
@@ -46,7 +29,7 @@ public class HttpClientTest extends BoltApplicationTest<MyApp> {
   @Test
   public void 'send POST request'() {
     def body = 'This is the body'
-    client.createRequest(post('/post').body(body)).then({
+    http.createRequest(post('/post').body(body)).then({
       assertEquals(200, it.status)
       assertEquals(body, it.body)
     })
@@ -54,7 +37,7 @@ public class HttpClientTest extends BoltApplicationTest<MyApp> {
 
   @Test
   public void 'send PUT request'() {
-    client.createRequest(put('/put')).then({
+    http.createRequest(put('/put')).then({
       assertEquals(200, it.status)
       assertEquals('put', it.body)
     })
@@ -62,7 +45,7 @@ public class HttpClientTest extends BoltApplicationTest<MyApp> {
 
   @Test
   public void 'send DELETE request'() {
-    client.createRequest(delete('/delete')).then({
+    http.createRequest(delete('/delete')).then({
       assertEquals(200, it.status)
       assertEquals('delete', it.body)
     })
@@ -70,7 +53,7 @@ public class HttpClientTest extends BoltApplicationTest<MyApp> {
 
   @Test
   public void 'get cookies'() {
-    client.createRequest(get('/cookie')).then({
+    http.createRequest(get('/cookie')).then({
       assertEquals(200, it.status)
       assertNotNull(it.cookies.get("foo"))
       assertEquals('bar', it.cookies.get('foo').value())
@@ -80,7 +63,7 @@ public class HttpClientTest extends BoltApplicationTest<MyApp> {
   @Test
   public void 'send a cookie with a request'() {
     def value = "hello"
-    client.createRequest(post('/cookie').cookie('foo', value))
+    http.createRequest(post('/cookie').cookie('foo', value))
     .then({
       assertEquals(200, it.status)
       assertEquals(value, it.body)

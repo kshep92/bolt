@@ -22,7 +22,7 @@ class InjectionTest extends BoltApplicationTest<MyApp> {
   @Before
   public void setUp() throws Exception {
     userService = mock(UserService)
-    application.userController.userService = userService
+    app.userController.userService = userService
   }
 
   @Test
@@ -53,8 +53,8 @@ class InjectionTest extends BoltApplicationTest<MyApp> {
   @Test
   public void 'change value on server while running'() {
     given(userService.save()).willReturn("IT WORKED!")
-    application.userController.userService = userService
-    client.createRequest(HttpRequest.get('/users')).then({
+    app.userController.userService = userService
+    http.createRequest(HttpRequest.get('/users')).then({
       assertEquals(200, it.status)
       assertEquals('IT WORKED!', it.body)
       println(it)

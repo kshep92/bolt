@@ -2,59 +2,74 @@ package com.boltframework.test;
 
 import com.boltframework.BoltApplication;
 import com.boltframework.config.ServerConfiguration;
+import com.boltframework.test.runners.BoltTestRunner;
 import com.boltframework.utils.httpclient.HttpClient;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
-import com.boltframework.test.runners.BoltTestRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.boltframework.BoltApplication.ReadyState.Running;
+import static com.boltframework.BoltApplication.ReadyState.Stopped;
 
 
 @SuppressWarnings({"unchecked", "WeakerAccess"})
 @RunWith(BoltTestRunner.class)
 public abstract class BoltApplicationTest<T extends BoltApplication> {
 
-  protected static HttpClient client = new HttpClient();
-  private static BoltApplication application;
   private static Logger logger = LoggerFactory.getLogger(BoltApplicationTest.class.getCanonicalName());
-  private static boolean applicationStarted = false;
+  protected static BoltApplication app;
 
-  @BeforeClass
-  public static void startApplication() {
-    Assert.assertNotNull(application);
-    if(applicationStarted) return;
+  protected static HttpClient http = new HttpClient();
+
+  private static void startApplication() {
+    // Detect if an application is already running, if so do nothing.
+    if(app.getReadyState() == Running) return;
+
+    // Otherwise, start the application
     logger.info("Starting app...");
     try {
-      application.start((started) -> {
+      app.start((started) -> {
         if (started) {
-          ServerConfiguration.HttpConfiguration httpConfig = application.getServerConfiguration().getHttpConfiguration();
-          client.setUrl(httpConfig.getEndpointUrl());
-          client.setReadyState(HttpClient.ReadyState.Ready);
-          applicationStarted = true;
-        } else client.setReadyState(HttpClient.ReadyState.Error);
+          ServerConfiguration.HttpConfiguration httpConfig = app.getServerConfiguration().getHttpConfiguration();
+          http.setUrl(httpConfig.getEndpointUrl());
+        }
       });
-      while (client.getReadyState() == HttpClient.ReadyState.Idle) {
-        System.out.println(".");
+      while (app.getReadyState() == Stopped) {
         Thread.sleep(300);
       }
-      Assert.assertEquals(HttpClient.ReadyState.Ready, client.getReadyState());
+      Assert.assertEquals(Running, app.getReadyState());
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
   }
 
-  public T getApplication() {
-    return (T) application;
+  public static BoltApplication _getRunningApp() {
+    return app;
   }
 
-  //TODO: Check if the application configuration is the same, and if not restart the application so the new configuration can be picked up
-  public static void setApplication(BoltApplication boltApplication) {
-    application = boltApplication;
+  public T getApp() {
+    return (T) app;
   }
 
-  public static void stopApplication() {
-
+  public static void setApp(BoltApplication boltApplication) {
+    app = boltApplication;
+    startApplication();
   }
 
+  private static void stopApplication() {
+    try {
+      if (app != null && app.getReadyState() == Running) {
+        logger.info("Application is running. Attempting to shut it down...");
+        app.stop();
+        while (app.getReadyState() == Running) {
+          Thread.sleep(300);
+        }
+        Assert.assertEquals(Stopped, app.getReadyState());
+        logger.info("Stopped application running on port {}", app.getServerConfiguration().http().getPort());
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
 }

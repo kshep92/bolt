@@ -172,5 +172,14 @@ getApplication(): T
 @BeforeClass static void startApplication()
 @AfterClass static void stopApplication()
 
+Start the application once for the duration of a test suite
+If we encounter a change in configuration between test classes {
+  create a new instance of the application with the new configuration
+  pass that instance to the test instance
+  instruct the test instance that it needs to run the application boot code again as well as stop any running instances of the application
+}
 
+To prevent random restarts during testing, tests should be grouped together into suites based on configurations
+
+Ideally it would be nice to start one instance of the application and swap out configurations as need be, but this will do for now.
 

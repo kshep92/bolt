@@ -2,6 +2,7 @@ package com.boltframework.test
 
 import com.google.common.net.MediaType
 import org.junit.Test
+import org.slf4j.LoggerFactory
 
 import static org.junit.Assert.*
 
@@ -41,7 +42,7 @@ class HttpContextTest {
     if(glob.charAt(glob.length() - 1) == '*')
       glob = glob.substring(0, glob.length() - 1)
     StringBuilder sb = new StringBuilder('*').append(glob).append('*')
-    println(sb.toString())
+    LoggerFactory.getLogger('HttpContextTest#convertToRegex').debug(sb.toString())
     return sb.toString().replace('*', ".*")
   }
 }
