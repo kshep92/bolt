@@ -26,6 +26,7 @@ class MyApp extends BoltApplication {
 
   @Override
   void doRoutes(RouteRegistry routes) {
+    routes.staticFiles('/public/*', 'web/public')
     routes.get({ it.response.ok('get') })
     routes.get('/header', { it.response.addHeader('foo', 'bar').ok('header') })
     routes.get('/cookie', {
@@ -39,7 +40,7 @@ class MyApp extends BoltApplication {
     routes.post('/post', { it.response.send(it.bodyAsString) })
     routes.put('/put', { it.response.send('put') })
     routes.delete('/delete', { it.response.send('delete') })
-    routes.use('/users', userController)
+    routes.mount('/users', userController)
     routes.get('/shutdown', { it.response.ok("Goodbye"); stop() })
     routes.get('/redirect', { it.response.redirect('http://www.google.com') } )
   }

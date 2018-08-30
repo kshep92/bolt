@@ -55,15 +55,6 @@ public abstract class BoltApplication implements WebModule {
     router.patch().handler(bodyHandler);
     RouteRegistry registry = new RouteRegistry(router, vertx, pebbleEngine, Json.mapper);
     this.doRoutes(registry);
-    configureStaticAssets();
-  }
-
-  private void configureStaticAssets() {
-    logger.info("Configuring static assets....");
-    StaticHandler staticHandler = StaticHandler.create();
-    ServerConfiguration.StaticFilesConfiguration config = serverConfiguration.getStaticFilesConfiguration();
-    staticHandler.setWebRoot(config.getDir()).setMaxAgeSeconds(config.getMaxAge()).setCachingEnabled(config.isCacheEnabled());
-    router.get(config.getUrl()).handler(staticHandler);
   }
 
   public void start() {

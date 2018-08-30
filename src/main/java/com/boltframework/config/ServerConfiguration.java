@@ -3,7 +3,6 @@ package com.boltframework.config;
 public class ServerConfiguration {
 
   private HttpConfiguration httpConfiguration = new HttpConfiguration();
-  private StaticFilesConfiguration staticFilesConfiguration = new StaticFilesConfiguration();
 
   public ServerConfiguration() {}
 
@@ -13,77 +12,6 @@ public class ServerConfiguration {
 
   public HttpConfiguration http() {
     return httpConfiguration;
-  }
-
-  public StaticFilesConfiguration getStaticFilesConfiguration() {
-    return staticFilesConfiguration;
-  }
-
-  public StaticFilesConfiguration resources() {
-    return staticFilesConfiguration;
-  }
-
-  public class StaticFilesConfiguration {
-    private String url = "/public";
-    private String dir = "web/public";
-    private Boolean cacheEnabled = false;
-    private Long maxAge = 0L;
-
-    StaticFilesConfiguration() {
-      //TODO: Set up caching automatically for Production
-    }
-
-    public String getUrl() {
-      return url;
-    }
-
-    public void setUrl(String url) {
-      this.url = url;
-    }
-
-    public String getDir() {
-      return dir;
-    }
-
-    public void setDir(String dir) {
-      this.dir = dir;
-    }
-
-    public Boolean isCacheEnabled() {
-      return cacheEnabled;
-    }
-
-    public void setCacheEnabled(Boolean cacheEnabled) {
-      this.cacheEnabled = cacheEnabled;
-    }
-
-    public Long getMaxAge() {
-      return maxAge;
-    }
-
-    public void setMaxAge(Long maxAge) {
-      this.maxAge = maxAge;
-    }
-
-    public StaticFilesConfiguration url(String url) {
-      setUrl(url);
-      return this;
-    }
-
-    public StaticFilesConfiguration dir(String dir) {
-      setUrl(dir);
-      return this;
-    }
-
-    public StaticFilesConfiguration cache(Boolean enabled) {
-      setCacheEnabled(enabled);
-      return this;
-    }
-
-    public StaticFilesConfiguration maxAge(long maxAge) {
-      setMaxAge(maxAge);
-      return this;
-    }
   }
 
   public class HttpConfiguration {

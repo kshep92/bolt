@@ -1,0 +1,28 @@
+class Signup extends Form {
+
+  @Required
+  String username
+  @Required
+  String password
+
+  @Override
+  private String validate() {
+    if(username == "shibby") return "We don't like that username."
+  }
+}
+
+# POST /accounts
+def form = ctx.getBodyAs(Signup.class)
+if(!form.valid()) ctx.badRequest(form.errorMessage())
+else {
+  def account = form.getInstance(Account.class) // Get an instance of a class pre-populated with this form's properties
+  def account = new Account();
+  form.copyPropertiesTo(account);  // Copy this form's properties to an instance
+  form.copyPropertiesFrom(account); // Copy properties from a source object to this instance
+}
+
+# GET /accounts/new
+
+def form =
+
+
