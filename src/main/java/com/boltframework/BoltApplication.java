@@ -12,7 +12,6 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
-import io.vertx.ext.web.handler.StaticHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +36,8 @@ public abstract class BoltApplication implements WebModule {
     logger.info("Reading server configuration...");
     this.configure(serverConfiguration);
     serverOptions
-        .setPort(serverConfiguration.getHttpConfiguration().getPort())
-        .setHost(serverConfiguration.getHttpConfiguration().getHost());
+        .setPort(serverConfiguration.getHttp().getPort())
+        .setHost(serverConfiguration.getHttp().getHost());
     server = vertx.createHttpServer(serverOptions);
     //TODO: Make this configurable
     pebbleEngine = new PebbleEngine.Builder().loader(new FileLoader()).build();

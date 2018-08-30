@@ -1,11 +1,13 @@
 package com.boltframework.config;
 
+import com.boltframework.utils.Env;
 import com.boltframework.web.Controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
+import org.omg.CORBA.Environment;
 
 public class RouteRegistry extends RouteBuilder {
   private Vertx vertx;
@@ -23,13 +25,19 @@ public class RouteRegistry extends RouteBuilder {
     router.mountSubRouter(path, builder.getRouter());
   }
 
-  public void staticFiles(String path, StaticHandler handler) {
-    router.get(path).handler(handler);
-  }
-
   public void staticFiles(String path, String directory) {
-    StaticHandler handler = StaticHandler.create(directory);
-    //TODO: Set up sensible defaults for caching when in production
+    StaticHandler handler = StaticHandler.create(directory).setDirectoryListing(false);
+    Boolean enableCache = false;
+    Long maxAge = 0L;
+    String mode = Env.getString("app.mode") == null ? "development" : Env.getString("app.mode");
+    assert mode != null;
+    if(mode.matches("prod.*")) {
+      enableCache = true;
+      maxAge = 3600L;
+    }
+    StaticFilesConfiguration configuration = new StaticFilesConfiguration();
+    configuration.setCacheEnabled(enableCache);
+    configuration.setMaxAge(maxAge);
     router.get(path).handler(handler);
   }
 

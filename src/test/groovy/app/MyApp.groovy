@@ -5,6 +5,7 @@ import com.boltframework.BoltApplication
 import com.boltframework.config.ContextConfiguration
 import com.boltframework.config.RouteRegistry
 import com.boltframework.config.ServerConfiguration
+import com.boltframework.utils.Env
 import com.google.inject.Inject
 import io.vertx.ext.web.Cookie
 
@@ -20,8 +21,7 @@ class MyApp extends BoltApplication {
 
   @Override
   void configure(ServerConfiguration config) {
-    config.httpConfiguration.port = 9000
-    config.resources().url('/*')
+    config.http.port = Env.getInt('app.port')?: 9000
   }
 
   @Override
