@@ -1,10 +1,21 @@
 package com.boltframework.test
 
+import app.Configuration
+import com.boltframework.test.forms.FormTest
+import com.boltframework.test.rules.TestServer
 import com.boltframework.utils.Env
+import org.junit.ClassRule
+import org.junit.Rule
 import org.junit.Test
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import static org.junit.Assert.*
 
 class EnvTest {
+
+  @ClassRule
+  public static TestServer testServer = new TestServer()
 
   @Test
   public void 'get string environment variable'() {

@@ -7,6 +7,7 @@ import com.google.inject.Guice
 import com.google.inject.Injector
 import org.junit.Before
 import org.junit.Test
+import org.slf4j.LoggerFactory
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
@@ -59,5 +60,12 @@ class InjectionTest extends BoltApplicationTest<MyApp> {
       assertEquals('IT WORKED!', it.body)
       println(it)
     })
+  }
+
+  @Test
+  public void packageTest() {
+    String className = Configuration.name
+    String packageName = className.substring(0, className.lastIndexOf('.'))
+    LoggerFactory.getLogger('tst').debug('{}.*', packageName)
   }
 }

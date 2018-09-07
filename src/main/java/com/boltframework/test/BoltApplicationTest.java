@@ -1,7 +1,7 @@
 package com.boltframework.test;
 
 import com.boltframework.BoltApplication;
-import com.boltframework.config.ServerConfiguration;
+import com.boltframework.config.HttpConfiguration;
 import com.boltframework.test.runners.BoltTestRunner;
 import com.boltframework.utils.httpclient.HttpClient;
 import org.junit.Assert;
@@ -31,7 +31,7 @@ public abstract class BoltApplicationTest<T extends BoltApplication> {
     try {
       app.start((started) -> {
         if (started) {
-          ServerConfiguration.HttpConfiguration httpConfig = app.getServerConfiguration().getHttpConfiguration();
+          HttpConfiguration httpConfig = app.getServerConfiguration().getHttp();
           http.setUrl(httpConfig.getEndpointUrl());
         }
       });
@@ -66,7 +66,7 @@ public abstract class BoltApplicationTest<T extends BoltApplication> {
           Thread.sleep(300);
         }
         Assert.assertEquals(Stopped, app.getReadyState());
-        logger.info("Stopped application running on port {}", app.getServerConfiguration().http().getPort());
+        logger.info("Stopped application running on port {}", app.getServerConfiguration().getHttp().getPort());
       }
     } catch (InterruptedException e) {
       e.printStackTrace();
