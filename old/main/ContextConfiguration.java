@@ -1,4 +1,4 @@
-package com.boltframework.config;
+package com.boltframework.old;
 
 import com.google.inject.AbstractModule;
 

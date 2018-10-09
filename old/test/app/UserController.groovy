@@ -1,8 +1,8 @@
 package app
 
-import com.boltframework.config.RouteBuilder
+import com.boltframework.old.RouteBuilder
 import com.boltframework.web.Controller
-import com.google.inject.Inject
+import Inject
 
 class UserController implements Controller {
 

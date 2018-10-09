@@ -1,9 +1,8 @@
 package com.boltframework.test
 
-import app.Configuration
-import app.MyApp
-import com.boltframework.config.ContextConfiguration
-import org.junit.Before
+import app.TestApplication
+import com.boltframework.test.rules.TestServer
+import org.junit.ClassRule
 import org.junit.Test
 import org.slf4j.LoggerFactory
 
@@ -13,23 +12,30 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 import static com.boltframework.utils.httpclient.HttpRequest.*
 
-@ContextConfiguration(Configuration)
-public class HttpClientTest extends BoltApplicationTest<MyApp> {
+public class ApplicationControllerTest {
 
   protected Logger logger = LoggerFactory.getLogger(getClass())
 
+  @ClassRule
+  public static TestServer server = new TestServer(TestApplication)
+
+  @Test
+  public void "server startup"() {
+    logger.debug("OK")
+  }
+
   @Test
   public void 'send GET request'() {
-    http.createRequest(get('/')).then({
+    server.createRequest(get('/')).then({
       assertEquals(200, it.status)
-      assertEquals('get', it.body)
+      assertEquals('index', it.body)
     })
   }
 
   @Test
   public void 'send POST request'() {
     def body = 'This is the body'
-    http.createRequest(post('/post').body(body)).then({
+    server.createRequest(post('/post').body(body)).then({
       assertEquals(200, it.status)
       assertEquals(body, it.body)
     })
@@ -37,23 +43,25 @@ public class HttpClientTest extends BoltApplicationTest<MyApp> {
 
   @Test
   public void 'send PUT request'() {
-    http.createRequest(put('/put')).then({
+    def body = "put"
+    server.createRequest(put('/put').body(body)).then({
       assertEquals(200, it.status)
-      assertEquals('put', it.body)
+      assertEquals(body, it.body)
     })
   }
 
   @Test
   public void 'send DELETE request'() {
-    http.createRequest(delete('/delete')).then({
+    def body = "delete"
+    server.createRequest(delete('/delete')).then({
       assertEquals(200, it.status)
-      assertEquals('delete', it.body)
+      assertEquals(body, it.body)
     })
   }
 
   @Test
   public void 'get cookies'() {
-    http.createRequest(get('/cookie')).then({
+    server.createRequest(get('/cookie')).then({
       assertEquals(200, it.status)
       assertNotNull(it.cookies.get("foo"))
       assertEquals('bar', it.cookies.get('foo').value())
@@ -63,7 +71,7 @@ public class HttpClientTest extends BoltApplicationTest<MyApp> {
   @Test
   public void 'send a cookie with a request'() {
     def value = "hello"
-    http.createRequest(post('/cookie').cookie('foo', value))
+    server.createRequest(post('/cookie').cookie('foo', value))
     .then({
       assertEquals(200, it.status)
       assertEquals(value, it.body)

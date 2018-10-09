@@ -1,7 +1,6 @@
-package com.boltframework.config;
+package com.boltframework.old;
 
-import com.boltframework.web.RouteContext;
-import com.boltframework.web.impl.RouteContextImpl;
+import com.boltframework.web.HttpContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import io.vertx.core.Handler;
@@ -13,6 +12,7 @@ import static io.vertx.core.http.HttpMethod.*;
 
 import java.util.function.Consumer;
 
+@Deprecated
 public class RouteBuilder {
   Router router;
   PebbleEngine pebbleEngine;
@@ -26,12 +26,12 @@ public class RouteBuilder {
     return router;
   }
 
-  private RouteBuilder createRoute(String path, HttpMethod method, Consumer<RouteContext> consumer) {
+  private RouteBuilder createRoute(String path, HttpMethod method, Consumer<HttpContext> consumer) {
     router.route(method, path).handler(new RoutingContextHandler(consumer));
     return this;
   }
 
-  public RouteBuilder get(String path, Consumer<RouteContext> consumer) {
+  public RouteBuilder get(String path, Consumer<HttpContext> consumer) {
     return createRoute(path, GET, consumer);
   }
 
@@ -44,57 +44,58 @@ public class RouteBuilder {
     return this;
   }
 
-  public RouteBuilder get(Consumer<RouteContext> consumer) {
+  public RouteBuilder get(Consumer<HttpContext> consumer) {
     return get("/", consumer);
   }
 
-  public RouteBuilder post(String path, Consumer<RouteContext> consumer) {
+  public RouteBuilder post(String path, Consumer<HttpContext> consumer) {
     return createRoute(path, POST, consumer);
   }
 
-  public RouteBuilder post(Consumer<RouteContext> consumer) {
+  public RouteBuilder post(Consumer<HttpContext> consumer) {
     return post("/",consumer);
   }
 
-  public RouteBuilder put(String path, Consumer<RouteContext> consumer) {
+  public RouteBuilder put(String path, Consumer<HttpContext> consumer) {
     return createRoute(path, PUT, consumer);
   }
 
-  public RouteBuilder put(Consumer<RouteContext> consumer) {
+  public RouteBuilder put(Consumer<HttpContext> consumer) {
     return put("/", consumer);
   }
 
-  public RouteBuilder delete(String path, Consumer<RouteContext> consumer) {
+  public RouteBuilder delete(String path, Consumer<HttpContext> consumer) {
     return createRoute(path, DELETE, consumer);
   }
 
-  public RouteBuilder delete(Consumer<RouteContext> consumer) {
+  public RouteBuilder delete(Consumer<HttpContext> consumer) {
     return delete("/", consumer);
   }
 
-  public RouteBuilder use(Consumer<RouteContext> consumer) {
+  public RouteBuilder use(Consumer<HttpContext> consumer) {
     router.route().handler(new RoutingContextHandler(consumer));
     return this;
   }
 
-  public RouteBuilder use(String path, Consumer<RouteContext> consumer) {
+  public RouteBuilder use(String path, Consumer<HttpContext> consumer) {
     router.route(path).handler(new RoutingContextHandler(consumer));
     return this;
   }
 
-  public RouteBuilder useRegex(String expression, Consumer<RouteContext> consumer) {
+  public RouteBuilder useRegex(String expression, Consumer<HttpContext> consumer) {
     router.routeWithRegex(expression).handler(new RoutingContextHandler(consumer));
     return this;
   }
 
   private class RoutingContextHandler implements Handler<RoutingContext> {
 
-    private Consumer<RouteContext> consumer;
+    private Consumer<HttpContext> consumer;
 
-    RoutingContextHandler(Consumer<RouteContext> consumer) { this.consumer = consumer; }
+    RoutingContextHandler(Consumer<HttpContext> consumer) { this.consumer = consumer; }
 
     public void handle(RoutingContext context) {
-      RouteContext routeContext = new RouteContextImpl(context, pebbleEngine, mapper);
+      HttpContext routeContext = new HttpContext();
+      routeContext.setDelegate(context);
       consumer.accept(routeContext);
     }
   }

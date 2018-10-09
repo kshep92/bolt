@@ -28,4 +28,14 @@ public class Env {
     return  value;
   }
 
+  public static Boolean isProd() {
+    String mode = getString("app.mode");
+    return mode != null && mode.toLowerCase().matches("prod.*");
+  }
+
+  public static Boolean isDev() {
+    String mode = getString("app.mode");
+    return mode == null || mode.toLowerCase().matches("dev.*");
+  }
+
 }

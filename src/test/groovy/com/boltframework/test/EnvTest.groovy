@@ -1,21 +1,11 @@
 package com.boltframework.test
 
-import app.Configuration
-import com.boltframework.test.forms.FormTest
-import com.boltframework.test.rules.TestServer
 import com.boltframework.utils.Env
-import org.junit.ClassRule
-import org.junit.Rule
 import org.junit.Test
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import static org.junit.Assert.*
 
 class EnvTest {
-
-  @ClassRule
-  public static TestServer testServer = new TestServer()
 
   @Test
   public void 'get string environment variable'() {
@@ -47,5 +37,19 @@ class EnvTest {
     assertFalse(Env.getBoolean(prop))
     System.clearProperty(prop)
     assertFalse(Env.getBoolean(prop))
+  }
+
+  @Test
+  public void 'check if in development mode'() {
+    System.setProperty('app.mode', 'dev')
+    assertTrue(Env.isDev())
+    assertFalse('Environment is dev', Env.isProd())
+  }
+
+  @Test
+  public void 'check if in production mode'() {
+    System.setProperty('app.mode', 'prod')
+    assertTrue(Env.isProd())
+    assertFalse('Environment is prod', Env.isDev())
   }
 }

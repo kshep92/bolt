@@ -17,6 +17,10 @@ public class HttpRequest extends HttpEntity {
     return new HttpRequest().method("POST").path(path);
   }
 
+  public static HttpRequest patch(String path) {
+    return new HttpRequest().method("PATCH").path(path);
+  }
+
   public static HttpRequest put(String path) {
     return new HttpRequest().method("PUT").path(path);
   }

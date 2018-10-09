@@ -1,13 +1,13 @@
 package app
 
-import com.boltframework.Bolt
-import com.boltframework.BoltApplication
-import com.boltframework.config.ContextConfiguration
-import com.boltframework.config.RouteRegistry
-import com.boltframework.config.ServerConfiguration
-import com.boltframework.utils.Env
-import com.google.inject.Inject
-import io.vertx.ext.web.Cookie
+import com.boltframework.old.Bolt
+import com.boltframework.old.BoltApplication
+import com.boltframework.old.ContextConfiguration
+import com.boltframework.old.RouteRegistry
+import com.boltframework.old.ServerConfiguration
+import Env
+import Inject
+import Cookie
 
 @ContextConfiguration(Configuration)
 class MyApp extends BoltApplication {

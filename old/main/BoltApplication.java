@@ -1,7 +1,5 @@
-package com.boltframework;
+package com.boltframework.old;
 
-import com.boltframework.config.RouteRegistry;
-import com.boltframework.config.ServerConfiguration;
 import com.boltframework.web.WebModule;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.loader.FileLoader;

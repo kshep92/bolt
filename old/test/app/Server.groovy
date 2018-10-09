@@ -1,6 +1,6 @@
 package app
 
-import com.google.inject.Inject
+import Inject
 
 class Server {
 

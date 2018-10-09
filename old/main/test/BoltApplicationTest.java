@@ -1,7 +1,7 @@
 package com.boltframework.test;
 
-import com.boltframework.BoltApplication;
-import com.boltframework.config.HttpConfiguration;
+import com.boltframework.old.BoltApplication;
+import com.boltframework.old.HttpConfiguration;
 import com.boltframework.test.runners.BoltTestRunner;
 import com.boltframework.utils.httpclient.HttpClient;
 import org.junit.Assert;
@@ -9,8 +9,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.boltframework.BoltApplication.ReadyState.Running;
-import static com.boltframework.BoltApplication.ReadyState.Stopped;
+import static com.boltframework.old.BoltApplication.ReadyState.Running;
+import static com.boltframework.old.BoltApplication.ReadyState.Stopped;
 
 
 @SuppressWarnings({"unchecked", "WeakerAccess"})

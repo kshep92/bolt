@@ -1,5 +1,6 @@
-package com.boltframework.config;
+package com.boltframework.old;
 
+@Deprecated
 public class HttpConfiguration {
   private String host ;
   private Integer port;

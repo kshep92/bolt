@@ -1,7 +1,7 @@
 package app
 
-import com.google.inject.AbstractModule
-import com.google.inject.Provides
+import AbstractModule
+import Provides
 
 class Configuration extends AbstractModule {
 

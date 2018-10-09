@@ -1,49 +1,172 @@
 package com.boltframework;
 
-import com.boltframework.config.ContextConfiguration;
+import com.boltframework.web.WebService;
+import com.boltframework.web.routing.PropertiesRegistry;
+import com.boltframework.web.routing.InterceptorBuilder;
+import com.boltframework.web.routing.InterceptorCollection;
+import com.boltframework.web.routing.InterceptorProperties;
+import com.boltframework.web.routing.ResourceHandlerBuilder;
+import com.boltframework.web.routing.ResourceHandlerCollection;
+import com.boltframework.web.routing.ResourceHandlerProperties;
+import com.boltframework.web.routing.RouteBuilder;
+import com.boltframework.web.routing.ControllerCollection;
+import com.boltframework.web.routing.RouteProperties;
 import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
+import com.google.inject.Module;
+import com.google.inject.Provides;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServer;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CookieHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
-@SuppressWarnings({"WeakerAccess"})
-public abstract class Bolt {
+public class Bolt {
 
-  private static BoltApplication instance;
+  private static Logger logger = LoggerFactory.getLogger(Bolt.class);
+  private WebService webService;
+  private Class<? extends WebService> serviceClass;
+  private Set<Module> configurationModules = new HashSet<>();
+  private ReadyState readyState;
+  private Vertx vertx;
+  private Router router;
+  private HttpServer server;
 
-  public static BoltApplication getInstance() {
-    return instance;
+  private Bolt(Class<? extends WebService> webServiceClass) {
+    this.serviceClass = webServiceClass;
+    readyState = ReadyState.Stopped;
   }
 
-  /* For custom bahaviour: Bolt.getInstance(MyApp.class).start( ... ) */
-  public static <T extends BoltApplication> T getInstance(Class<T> instanceType) {
-    Set<? extends AbstractModule> modules = getConfigurationModules(instanceType);
-    return Guice.createInjector(modules).getInstance(instanceType);
+  public void start() {
+    start(3000, (started) -> {});
   }
 
-  /* The preferred way: Bolt.run(MyApp.class) */
-  public static <T extends BoltApplication> void run(Class<T> applicationClass) {
-    instance = getInstance(applicationClass);
-    instance.beforeStart();
-    instance.start(started -> {
-      if(started) instance.onStart();
-    });
-
+  public void start(int port) {
+    start(port, (started) -> {});
   }
 
-  private static Set<AbstractModule> getConfigurationModules(Class clazz) {
-    HashSet<AbstractModule> result = new HashSet<>();
-    ContextConfiguration contextConfiguration = (ContextConfiguration) clazz.getAnnotation(ContextConfiguration.class);
-    if(contextConfiguration == null) return result;
-    Arrays.asList(contextConfiguration.value()).forEach(_class -> {
-      try {
-        result.add(_class.newInstance());
-      } catch (InstantiationException | IllegalAccessException e) {
-        e.printStackTrace();
+  public void start(int port, Consumer<Boolean> callback) {
+    buildApplicationContext();
+    buildRoutes();
+    server = vertx.createHttpServer();
+    server.requestHandler(router::accept).listen(port, async -> {
+      if(async.succeeded()) {
+        logger.info("Listening on http://localhost:{}", port);
+        readyState = ReadyState.Running;
+      } else {
+        logger.error("Could not start app: " + async.cause().getMessage());
+        readyState = ReadyState.Error;
       }
+      callback.accept(async.succeeded());
     });
-    return result;
   }
+
+  public void stop(Runnable runnable) {
+    server.close((result) -> {
+      if(result.succeeded()) logger.info("Terminating web service. Bye!");
+      else logger.error("Could not gracefully terminate application.");
+      readyState = ReadyState.Stopped;
+      runnable.run();
+    });
+  }
+
+  public void stop() {
+    stop(() -> {});
+  }
+
+  public ReadyState getReadyState() {
+    return readyState;
+  }
+
+  private void buildApplicationContext() {
+    vertx = Vertx.vertx();
+    router = Router.router(vertx);
+    DefaultConfigurationModule configurationModule = new DefaultConfigurationModule();
+    configurationModule.setVertx(vertx);
+    configurationModules.add(configurationModule);
+    ApplicationContext.initialize(configurationModules);
+    webService = ApplicationContext.getBean(serviceClass);
+  }
+
+  private void buildRoutes() {
+    logger.info("Building routes...");
+    BodyHandler bodyHandler = BodyHandler.create();
+    router.route().handler(CookieHandler.create());
+    router.post().handler(bodyHandler);
+    router.put().handler(bodyHandler);
+    router.patch().handler(bodyHandler);
+    addInterceptors();
+    addRoutes();
+    addStaticResourceHandlers();
+  }
+
+  private void addInterceptors() {
+    logger.info("Adding interceptors...");
+    InterceptorCollection registry = new InterceptorCollection();
+    webService.addInterceptors(registry);
+    for(InterceptorProperties properties : PropertiesRegistry.getInterceptorProperties()) {
+      InterceptorBuilder builder = new InterceptorBuilder(properties);
+      builder.buildRoutes(router);
+    }
+  }
+
+  //TODO: Experiment with Classpath scanning to gather the controllers
+  private void addRoutes() {
+    logger.info("Creating HTTP actions...");
+    ControllerCollection registry = new ControllerCollection();
+    webService.addControllers(registry);
+    for(RouteProperties properties : PropertiesRegistry.getRouteProperties()) {
+      RouteBuilder builder = new RouteBuilder(properties);
+      builder.buildRoutes(router);
+    }
+  }
+
+  private void addStaticResourceHandlers() {
+    logger.debug("Adding static resource handlers...");
+    ResourceHandlerCollection registry = new ResourceHandlerCollection();
+    webService.addResourceHandlers(registry);
+    for(ResourceHandlerProperties properties : PropertiesRegistry.getResourceHandlerProperties()) {
+      ResourceHandlerBuilder builder = new ResourceHandlerBuilder(properties);
+      builder.buildRoutes(router);
+    }
+  }
+
+  public static Bolt createService(Class<? extends WebService> webServiceClass) {
+    return new Bolt(webServiceClass);
+  }
+
+  public Bolt withConfiguration(Module... modules) {
+    configurationModules.addAll(Arrays.asList(modules));
+    return this;
+  }
+
+  public Bolt withConfiguration(Iterable<Module> modules) {
+    modules.forEach(configurationModules::add);
+    return this;
+  }
+
+  private static class DefaultConfigurationModule extends AbstractModule {
+    Vertx vertx;
+
+    @Override
+    protected void configure() {
+      super.configure();
+    }
+
+    @Provides
+    public Vertx getVertx() {
+      return vertx;
+    }
+
+    public void setVertx(Vertx vertx) {
+      this.vertx = vertx;
+    }
+  }
+
 }

@@ -36,7 +36,7 @@ class HttpContextTest {
     return ContentType.matches(convertToRegex(contentType))
   }
 
-  String convertToRegex(String glob) {
+  static String convertToRegex(String glob) {
     if(glob.charAt(0) == '*' as Character)
       glob = glob.substring(1)
     if(glob.charAt(glob.length() - 1) == '*')

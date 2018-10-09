@@ -1,7 +1,7 @@
 package com.boltframework.test.runners;
 
-import com.boltframework.BoltApplication;
-import com.boltframework.config.ContextConfiguration;
+import com.boltframework.old.BoltApplication;
+import com.boltframework.old.ContextConfiguration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import org.junit.runners.BlockJUnit4ClassRunner;
