@@ -1,17 +1,15 @@
 package app.controllers;
 
 import com.boltframework.web.mvc.Controller;
-import com.boltframework.web.routing.annotations.Before;
-import com.boltframework.web.routing.annotations.Path;
+import com.boltframework.web.routing.annotations.RequestMapping;
 import com.boltframework.web.routing.annotations.Route;
 import io.vertx.core.http.HttpMethod;
 
 import java.util.HashMap;
 
-@Path("users")
+@RequestMapping("users")
 public class Users extends Controller {
 
-  @Before(":id")
   public void setUser() {
     Long id = Long.parseLong(request().getParam("id"));
     context().put("user", new HashMap<>()).next();

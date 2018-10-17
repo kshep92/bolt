@@ -3,11 +3,13 @@ package com.boltframework.utils.httpclient;
 import com.boltframework.utils.Strings;
 
 import java.util.HashMap;
+import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 public class HttpRequest extends HttpEntity {
   private String method;
   private HashMap<String, String> queryParams = new HashMap<>();
+  private Boolean followRedirects = false;
 
   public static HttpRequest get(String path) {
     return new HttpRequest().method("GET").path(path);
@@ -63,6 +65,21 @@ public class HttpRequest extends HttpEntity {
   public HttpRequest contentType(String contentType) {
     addHeader("Content-Type", contentType);
     return this;
+  }
+
+  public String getContentType() {
+    List<String> contentTypes = getHeaders().get("Content-Type");
+    if(contentTypes != null && !contentTypes.isEmpty()) return contentTypes.get(0);
+    else return "text/plain";
+  }
+
+  public HttpRequest followRedirects() {
+    this.followRedirects = true;
+    return this;
+  }
+
+  public Boolean getFollowRedirects() {
+    return followRedirects;
   }
 
   public HttpRequest json(String body) {

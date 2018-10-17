@@ -1,5 +1,8 @@
 package com.boltframework;
 
+import com.boltframework.data.ConverterRegistry;
+import com.boltframework.data.converters.*;
+import com.boltframework.utils.Env;
 import com.boltframework.web.WebService;
 import com.boltframework.web.routing.PropertiesRegistry;
 import com.boltframework.web.routing.InterceptorBuilder;
@@ -29,7 +32,7 @@ import java.util.function.Consumer;
 
 public class Bolt {
 
-  private static Logger logger = LoggerFactory.getLogger(Bolt.class);
+  protected static Logger logger = LoggerFactory.getLogger(Bolt.class);
   private WebService webService;
   private Class<? extends WebService> serviceClass;
   private Set<Module> configurationModules = new HashSet<>();
@@ -38,13 +41,33 @@ public class Bolt {
   private Router router;
   private HttpServer server;
 
-  private Bolt(Class<? extends WebService> webServiceClass) {
+  protected Bolt() {}
+
+  protected Router getRouter() {
+    return router;
+  }
+
+  protected void setRouter(Router router) {
+    this.router = router;
+  }
+
+  protected Class<? extends WebService> getServiceClass() {
+    return serviceClass;
+  }
+
+  protected void setServiceClass(Class<? extends WebService> serviceClass) {
+    this.serviceClass = serviceClass;
+  }
+
+  protected Bolt(Class<? extends WebService> webServiceClass) {
     this.serviceClass = webServiceClass;
     readyState = ReadyState.Stopped;
   }
 
   public void start() {
-    start(3000, (started) -> {});
+    @SuppressWarnings("ConstantConditions")
+    Integer port = Env.getInt("http.port", 3000);
+    start(port, (started) -> {});
   }
 
   public void start(int port) {
@@ -53,6 +76,7 @@ public class Bolt {
 
   public void start(int port, Consumer<Boolean> callback) {
     buildApplicationContext();
+    registerTypeConverters();
     buildRoutes();
     server = vertx.createHttpServer();
     server.requestHandler(router::accept).listen(port, async -> {
@@ -65,6 +89,14 @@ public class Bolt {
       }
       callback.accept(async.succeeded());
     });
+  }
+
+  private void registerTypeConverters() {
+    ConverterRegistry.add(Boolean.class, new BooleanConverter());
+    ConverterRegistry.add(Double.class, new DoubleConverter());
+    ConverterRegistry.add(Integer.class, new IntConverter());
+    ConverterRegistry.add(Long.class, new LongConverter());
+    ConverterRegistry.add(String.class, new StringConverter());
   }
 
   public void stop(Runnable runnable) {
@@ -84,17 +116,17 @@ public class Bolt {
     return readyState;
   }
 
-  private void buildApplicationContext() {
+  protected void buildApplicationContext() {
     vertx = Vertx.vertx();
     router = Router.router(vertx);
     DefaultConfigurationModule configurationModule = new DefaultConfigurationModule();
     configurationModule.setVertx(vertx);
     configurationModules.add(configurationModule);
-    ApplicationContext.initialize(configurationModules);
-    webService = ApplicationContext.getBean(serviceClass);
+    ApplicationContext.initializeWith(configurationModules);
   }
 
   private void buildRoutes() {
+    webService = ApplicationContext.getBean(serviceClass);
     logger.info("Building routes...");
     BodyHandler bodyHandler = BodyHandler.create();
     router.route().handler(CookieHandler.create());
@@ -117,7 +149,7 @@ public class Bolt {
   }
 
   //TODO: Experiment with Classpath scanning to gather the controllers
-  private void addRoutes() {
+  protected void addRoutes() {
     logger.info("Creating HTTP actions...");
     ControllerCollection registry = new ControllerCollection();
     webService.addControllers(registry);
@@ -141,17 +173,17 @@ public class Bolt {
     return new Bolt(webServiceClass);
   }
 
-  public Bolt withConfiguration(Module... modules) {
+  public Bolt withDependencies(Module... modules) {
     configurationModules.addAll(Arrays.asList(modules));
     return this;
   }
 
-  public Bolt withConfiguration(Iterable<Module> modules) {
+  public Bolt withDependencies(Iterable<Module> modules) {
     modules.forEach(configurationModules::add);
     return this;
   }
 
-  private static class DefaultConfigurationModule extends AbstractModule {
+  protected static class DefaultConfigurationModule extends AbstractModule {
     Vertx vertx;
 
     @Override

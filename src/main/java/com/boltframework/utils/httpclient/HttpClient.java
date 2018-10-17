@@ -55,26 +55,33 @@ public class HttpClient {
       URL url = new URL(this.url + request.getPath());
       connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod(request.getMethod());
-      if(!request.getBody().isEmpty())
+      connection.setInstanceFollowRedirects(request.getFollowRedirects());
+      if(!request.getBody().isEmpty()) {
+        connection.setDoOutput(true);
         writeRequestBody(request, connection);
+      }
       if(!request.getCookies().isEmpty())
         addCookies(request, connection);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+      int responseCode = connection.getResponseCode();
+      InputStream inputStream;
       StringBuilder body = new StringBuilder();
-      reader.lines().forEach(body::append);
+      if(responseCode >= 200 && responseCode < 400) inputStream = connection.getInputStream();
+      else inputStream = connection.getErrorStream();
+      if(inputStream != null) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        reader.lines().forEach(body::append);
+      }
 
       // Build the response
       response.setPath(request.getPath());
-      response.setStatus(connection.getResponseCode());
+      response.setStatus(responseCode);
       response.setBody(body.toString());
       response.setUrl(connection.getURL().toString());
       response.setHeaders(getHeaders(connection));
       response.setCookies(getCookies(connection));
-    } catch (FileNotFoundException e) {
-      response.setStatus(404);
-    } catch (IOException e) {
-      response.setStatus(500);
-      System.err.println(e.getMessage());
+    } catch (Exception e) {
+      System.err.println(getClass().getName() + ": " + e.getMessage());
+      e.printStackTrace();
     }
     return response;
   }
@@ -112,8 +119,8 @@ public class HttpClient {
   }
 
   private void writeRequestBody(HttpRequest request, HttpURLConnection conn) {
-    conn.setDoOutput(true);
     DataOutputStream stream;
+    conn.setRequestProperty("Content-Type", request.getContentType());
     try {
       stream = new DataOutputStream(conn.getOutputStream());
       stream.writeBytes(request.getBody());

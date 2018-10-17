@@ -3,8 +3,7 @@ package app.controllers;
 import com.boltframework.utils.Env;
 import com.boltframework.web.HttpResponse;
 import com.boltframework.web.mvc.Controller;
-import com.boltframework.web.routing.annotations.Path;
-import com.boltframework.web.routing.annotations.Route;
+import com.boltframework.web.routing.annotations.*;
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Vertx;
@@ -14,7 +13,7 @@ import io.vertx.core.http.HttpMethod;
 import java.util.Arrays;
 
 @SuppressWarnings("unused")
-@Path
+@RequestMapping
 public class Application extends Controller {
 
   private Vertx vertx;
@@ -24,31 +23,31 @@ public class Application extends Controller {
     this.vertx = vertx;
   }
 
-  @Route
+  @Get
   public void index() {
     response().ok("index");
   }
 
-  @Route(value = "post", method = HttpMethod.POST)
+  @Post("post")
   public void post() {
     String body = context().getBodyAsString();
     response().ok(body);
   }
 
-  @Route(value = "/put", method = HttpMethod.PUT)
+  @Put("put")
   public void put() {
     String body = context().getBodyAsString();
     response().ok(body);
   }
 
-  @Route(value = "/delete", method = HttpMethod.DELETE)
+  @Delete("delete")
   public void delete() {
     response().ok("delete");
   }
 
-  @Route("/cookie")
+  @Get("cookie")
   public void cookies() {
-    context().addCookie("foo", "bar").getResponse().ok();
+    context().addCookie("foo", "bar").getResponse().ok().end();
   }
 
   @Route(value = "/cookie", method = HttpMethod.POST)
@@ -56,14 +55,15 @@ public class Application extends Controller {
     response().ok(context().getCookie("foo").getValue());
   }
 
-  @Route("/ip")
-  public void anotherIpAddress() {
-    context().put("message", "hi").next();
+  @Get("ip")
+  public void ip() {
+    logger.debug("Running the ip() method first...");
+    context().put("message", "Hey!").next();
   }
 
   @Route(value = "/ip", order = 1)
   public void ipAddress() {
-    response().ok(context().get("message").toString());
+    response().ok("IP address is: " + request().getIpAddress());
   }
 
   @Route("/nonblocking")
@@ -110,5 +110,10 @@ public class Application extends Controller {
   public void shutdown() {
     response().ok("Shutting down the application. Bye!");
     vertx.setTimer(200, (delay) -> System.exit(200));
+  }
+
+  @Get("todo")
+  public void todo() {
+    response().todo();
   }
 }

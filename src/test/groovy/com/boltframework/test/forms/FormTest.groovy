@@ -1,6 +1,6 @@
 package com.boltframework.test.forms
 
-import com.boltframework.utils.forms.Form
+import com.boltframework.data.forms.Form
 import org.junit.Before
 import org.junit.Test
 import org.slf4j.Logger

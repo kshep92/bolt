@@ -1,10 +1,12 @@
 package com.boltframework;
 
-import com.boltframework.web.routing.annotations.Path;
+import com.boltframework.web.mvc.Controller;
+import com.boltframework.web.routing.annotations.RequestMapping;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,27 +14,25 @@ public class ApplicationContext {
 
   private static Injector injector;
 
-  private static Map<String, Object> controllers = new HashMap<>();
+  private static Map<String, Controller> controllers = new HashMap<>();
 
-  public static <T> T getBean(Class<T> beanClass) {
-    if(beanClass.getAnnotation(Path.class) != null)
-      return getController(beanClass);
+  public static <T> T getBean(@Nonnull Class<T> beanClass) {
+    if(beanClass.getAnnotation(RequestMapping.class) != null)
+      return beanClass.cast(getController(beanClass));
     return injector.getInstance(beanClass);
   }
 
-  public static void initialize(Iterable<? extends Module> modules) {
+  static void initializeWith(Iterable<? extends Module> modules) {
     injector = Guice.createInjector(modules);
   }
 
-  @SuppressWarnings("unchecked")
-  public static void addController(Class controllerClass) {
-    controllers.put(controllerClass.getName(), injector.getInstance(controllerClass));
+  public static void put(Class<? extends Controller> controllerClass, Controller controller) {
+    controllers.put(controllerClass.getName(), controller);
   }
 
   public static <T> T getController(Class<T> controllerClass) {
     String className = controllerClass.getName();
-    if(controllers.get(className) == null) addController(controllerClass);
+    if(controllers.get(className) == null) controllers.put(className, (Controller) injector.getInstance(controllerClass));
     return controllerClass.cast(controllers.get(className));
   }
-
 }

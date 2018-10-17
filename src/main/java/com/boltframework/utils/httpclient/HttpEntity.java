@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
-abstract class HttpEntity {
+public abstract class HttpEntity {
   HashMap<String, List<String>> headers = new HashMap<>();
   String body = "";
   String path;

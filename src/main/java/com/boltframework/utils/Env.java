@@ -11,10 +11,19 @@ public class Env {
     return get(key);
   }
 
+  public static String getString(String key, String defaultValue) {
+    return getString(key) == null ? defaultValue : getString(key);
+  }
+
   @Nullable
   public static Integer getInt(String key) {
     String value = get(key);
     return value == null ? null : Integer.parseInt(value);
+  }
+
+  public static Integer getInt(String key, int defaultValue) {
+    if(getInt(key) == null) return defaultValue;
+    else return getInt(key);
   }
 
   @NotNull

@@ -33,7 +33,7 @@ You're done!
 A Bolt application is comprised of at least two parts - a Controller and a Web Service. A controller is nothing more than a regular Java class annotated with special annotations that tell Bolt how to wire up routing. Here's an example of a controller class:
 
 ```java
-@Path("/") // 1
+@RequestMapping("/") // 1
 public class ApplicationController extends Controller { // 2
   
   @Route // 3
@@ -45,7 +45,7 @@ public class ApplicationController extends Controller { // 2
 
 Not a few things:
 
-1. The `@Path` annotation: This indicates the URL at which you can access this controller
+1. The `@Route` annotation: This indicates the URL at which you can access this controller
 2. Each controller must extend the Controller class
 3. The `@Route` annotation: This tells Bolt to treat this method as a request handler
 
@@ -81,14 +81,14 @@ Your application will start and can be accessed at http://localhost:3000
 
 ## Routing
 
-In the previous section we got a brief introduction to routing. Construction of your application's routing table is achieved by using the `@Path` annotation on your controllers, the `@Route` annotation on any of the controller methods and finally registering the controller in the main Web Service.
+In the previous section we got a brief introduction to routing. Construction of your application's routing table is achieved by using the `@RequestMapping` annotation on your controllers, the `@Route` annotation on any of the controller methods and finally registering the controller in the main Web Service.
 
-### The @Path annotation
+### The @RequestMapping annotation
 
 This annotation is used to tell the route builder which prefix to apply to the routes in this controller. Let's look at an example:
 
 ```java
-@Path("/greeting")
+@RequestMapping("/greeting")
 class GreetingController extends Controller {
     
     @Route("/say-hello")
@@ -111,6 +111,7 @@ The `@Route` annotation allows you to create clean and highly specific routes.
 | consumes | `String[]`   | `{}`             | A list of MIME types that the route should accept. E.g. `application/json` |
 | produces | `String[]`   | `{}`             | A list of MIME types that the route produces. E.g. `text/plain` |
 | method   | `HttpMethod` | `HttpMethod.GET` | The HTTP verb associated with this route. See [Routing by HTTP Method](#routing-by-http-method) for more details. |
+| order    | Integer      | 0                | The order this route is added to the routing table           |
 
 
 
@@ -151,6 +152,18 @@ All HTTP methods are supported:
 * POST
 * PUT
 
+You can also create a route using convenience annotations for each HTTP method:
+
+* @Delete
+* @Get
+* @Head
+* @Options
+* @Patch
+* @Post
+* @Put
+
+All of these annotations take the same parameters as the regular `@Route` annotation except `method`.
+
 #### Path parameters
 
 You can specify parameters in your routes as well:
@@ -182,7 +195,7 @@ If you'd like your application to choose a route depending on the `Content-Type`
 ```java
 @Route(value = "/json", consumes = "application/json")
 public void jsonRoute() {
-    response().ok("I only accept JSON requests.");
+    response().ok().json("I only accept JSON requests.");
 }
 ```
 
@@ -206,12 +219,12 @@ You can also specify multiple content types here.
 Generally, you'll want make your URI patterns for your routes as specific as possible since there is no guarantee of the order the route definitions will be read at application startup time. For example, if you have the following routes:
 
 ```java
-@Route("/home") // Potentially unreachable :-(
+@Get("/home") // Potentially unreachable 😟
 public void home() {
     // ...
 }
 
-@Route("/*")
+@Get("/*")
 public void catchAll() {
     // ...
 }
@@ -228,11 +241,9 @@ public void catchAll() {
 }
  ```
 
-**Tip:** Try to think of route order as array indexes where 0 is the first element in the array and n is the last index. The higher the number n is, the further down in the array it is.
+**Tip:** Try to think of route order as array indexes where 0 is the first element in the array and *n* is the last index. The higher the number *n* is, the further down in the array it is.
 
-**Note:** Route ordering is done on a per controller basis. A very general/catch-all route may be ordered last in one controller, but can make the rest of your routes unreachable depending on the order in which you register your controllers with your Web Service. 
-
-Plan your routes carefully for best results.
+**Note:** Route ordering is done on a per controller basis. A very general/catch-all route may be ordered last in one controller, but can make the rest of your routes unreachable depending on the order in which you register your controllers with your Web Service. Plan your routes carefully for best results.
 
 ### Configuration
 

@@ -1,4 +1,4 @@
-package com.boltframework.utils.forms;
+package com.boltframework.data.forms;
 
 import org.hibernate.validator.HibernateValidator;
 import org.slf4j.Logger;

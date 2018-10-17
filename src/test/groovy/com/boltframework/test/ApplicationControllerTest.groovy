@@ -1,8 +1,8 @@
 package com.boltframework.test
 
 import app.TestApplication
-import com.boltframework.test.rules.TestServer
-import org.junit.ClassRule
+import app.controllers.Application
+import org.junit.AfterClass
 import org.junit.Test
 import org.slf4j.LoggerFactory
 
@@ -16,8 +16,16 @@ public class ApplicationControllerTest {
 
   protected Logger logger = LoggerFactory.getLogger(getClass())
 
-  @ClassRule
-  public static TestServer server = new TestServer(TestApplication)
+  public static TestApplicationServer server = new TestApplicationServer(TestApplication)
+
+  static {
+    server.setController(new Application())
+  }
+
+  @AfterClass
+  static void tearDown() {
+    server.stop()
+  }
 
   @Test
   public void "server startup"() {
