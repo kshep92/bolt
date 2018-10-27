@@ -1,5 +1,0 @@
-rules:
-  - rule: '/users/home'
-    permissions:
-      - 'authenticated'
-      - 'edit_profile'
