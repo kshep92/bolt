@@ -1,5 +1,10 @@
 package com.boltframework.utils.httpclient;
 
+/**
+ * A class that wraps the data returned from a typical {@link java.net.HttpURLConnection} transaction. Used in
+ * {@link HttpClient}
+ * Headers, cookies, response statuses, response body, etc.
+ */
 public class HttpResponse extends HttpEntity {
   private Integer status;
   private String url;

@@ -1,5 +1,9 @@
 package com.boltframework.utils;
 
+/**
+ * A utility class created before I found out about {@link java.util.StringJoiner}
+ */
+@Deprecated
 public class Strings {
   public static String trimStart(String string, int chars) {
     return string.substring(chars);

@@ -1,6 +1,7 @@
 plugins {
   id 'groovy'
   id 'java'
+  id 'maven'
 }
 
 group 'com.boltframework'

@@ -1,6 +1,6 @@
 package app.controllers;
 
-import com.boltframework.utils.Env;
+import com.boltframework.config.Env;
 import com.boltframework.web.HttpResponse;
 import com.boltframework.web.mvc.Controller;
 import com.boltframework.web.routing.annotations.*;

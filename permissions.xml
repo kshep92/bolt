@@ -1,0 +1,6 @@
+<rules>
+  <rule pattern="(?!login|logout|authenticate).*" permissions="log_in" />
+  <rule path="audit/*" permissions="manage_system view_logs" />
+  <rule path="admin/*" permissions="something something_else" />
+  <rule path="/users/create" permissions="manage_users" />
+</rules>

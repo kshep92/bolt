@@ -1,6 +1,8 @@
 # Bolt Framework
 
-Application development in an instant.
+:rotating_light: **BE ADVISED:** This project is in _super_ early development. It's only provided at this point as a concept/experiment.
+
+Application development in an instant!
 
 ## About Bolt
 

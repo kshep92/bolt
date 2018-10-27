@@ -1,13 +1,18 @@
 package com.boltframework.utils.httpclient;
 
 import com.boltframework.utils.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public class HttpClient {
@@ -15,6 +20,7 @@ public class HttpClient {
   private String url;
   private HttpRequest request;
   private ReadyState readyState;
+  private Logger logger = LoggerFactory.getLogger(getClass());
 
   public HttpClient() {
     readyState = ReadyState.Idle;
@@ -56,12 +62,15 @@ public class HttpClient {
       connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod(request.getMethod());
       connection.setInstanceFollowRedirects(request.getFollowRedirects());
+      if(!request.getCookies().isEmpty())
+        addCookies(request, connection);
+      if(!request.getHeaders().isEmpty())
+        addHeaders(request, connection);
       if(!request.getBody().isEmpty()) {
         connection.setDoOutput(true);
         writeRequestBody(request, connection);
       }
-      if(!request.getCookies().isEmpty())
-        addCookies(request, connection);
+      connection.connect();
       int responseCode = connection.getResponseCode();
       InputStream inputStream;
       StringBuilder body = new StringBuilder();
@@ -87,11 +96,11 @@ public class HttpClient {
   }
 
   private void addCookies(HttpRequest pendingRequest, HttpURLConnection connection) {
-    StringBuilder sb = new StringBuilder();
+    StringJoiner joiner = new StringJoiner("; ");
     pendingRequest.getCookies().forEach((key, val) -> {
-      sb.append(String.format("%s=%s; path=%s", key, val.value(), val.path())).append("; ");
-      String cookie = sb.toString();
-      connection.addRequestProperty("Cookie", Strings.trimEnd(cookie));
+      joiner.add(String.format("%s=%s; path=%s", key, val.value(), val.path()));
+      String cookie = joiner.toString();
+      connection.addRequestProperty("Cookie", cookie);
     });
   }
 
@@ -106,6 +115,13 @@ public class HttpClient {
       }
     });
     return cookies;
+  }
+
+  private void addHeaders(HttpRequest request, HttpURLConnection connection) {
+    request.getHeaders().forEach((key, value) -> {
+      String headerString = value.stream().collect(Collectors.joining("; "));
+      connection.setRequestProperty(key, headerString);
+    });
   }
 
   private HashMap<String, List<String>> getHeaders(HttpURLConnection connection) {

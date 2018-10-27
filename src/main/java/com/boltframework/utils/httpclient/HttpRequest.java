@@ -1,10 +1,14 @@
 package com.boltframework.utils.httpclient;
 
-import com.boltframework.utils.Strings;
+import com.boltframework.utils.Json;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringJoiner;
 
+/**
+ * Utility class for creating an HTTP request.
+ */
 @SuppressWarnings("WeakerAccess")
 public class HttpRequest extends HttpEntity {
   private String method;
@@ -31,7 +35,13 @@ public class HttpRequest extends HttpEntity {
     return new HttpRequest().method("DELETE").path(path);
   }
 
+  public HttpRequest accept(String contentType) {
+    addHeader("Accept", contentType);
+    return this;
+  }
+
   public HttpRequest path(String path) {
+    path = !path.startsWith("/") ? "/" + path : path;
     this.path = path;
     return this;
   }
@@ -54,6 +64,11 @@ public class HttpRequest extends HttpEntity {
   public HttpRequest cookie(String name, String value) {
     Cookie cookie = Cookie.create(name, value);
     getCookies().put(name, cookie);
+    return this;
+  }
+
+  public HttpRequest cookie(Cookie cookie) {
+    getCookies().put(cookie.name(), cookie);
     return this;
   }
 
@@ -86,6 +101,10 @@ public class HttpRequest extends HttpEntity {
     return contentType("application/json").body(body);
   }
 
+  public HttpRequest json(Object object) {
+    return json(Json.stringify(object));
+  }
+
   @Override
   public String getPath() {
     if(!queryParams.isEmpty()) path = path.concat("?").concat(getQueryString());
@@ -103,12 +122,8 @@ public class HttpRequest extends HttpEntity {
   }
 
   private String getQueryString() {
-    StringBuilder sb = new StringBuilder();
-    String queryString;
-    queryParams.forEach((key, value) -> sb.append(String.format("%s=%s&", key, value)));
-    queryString = sb.toString();
-    if(sb.length() > 0)
-      queryString = Strings.trimEnd(queryString); // Remove the trailing &
-    return queryString;
+    StringJoiner joiner = new StringJoiner("&");
+    queryParams.forEach((key, value) -> joiner.add(String.format("%s=%s", key, value)));
+    return joiner.toString();
   }
 }

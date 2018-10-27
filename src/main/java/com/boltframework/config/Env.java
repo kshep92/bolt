@@ -1,8 +1,7 @@
-package com.boltframework.utils;
-
-import com.sun.istack.internal.NotNull;
+package com.boltframework.config;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 
 public class Env {
 

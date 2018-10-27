@@ -21,7 +21,7 @@ public class TestApplicationServer extends Bolt {
   private Logger logger = LoggerFactory.getLogger(getClass());
   private HttpClient httpClient = new HttpClient();
   private Controller controller;
-  private int port = new Random().nextInt(3000) + 3000;
+  private int port = new Random().nextInt(3000) + 6000;
   private boolean contextBuilt = false;
 
   public TestApplicationServer(){}
@@ -38,7 +38,7 @@ public class TestApplicationServer extends Bolt {
   protected void addRoutes() {
     logger.info("Creating HTTP actions...");
     ControllerCollection registry = new ControllerCollection();
-    registry.register(controller.getClass());
+    registry.register(controller.getClass(), true);
     ApplicationContext.put(controller.getClass(), controller);
     for(RouteProperties properties : PropertiesRegistry.getRouteProperties()) {
       RouteBuilder builder = new RouteBuilder(properties);
@@ -63,7 +63,7 @@ public class TestApplicationServer extends Bolt {
     this.controller = controller;
   }
 
-  public <T> T get(Class<T> type) {
+  public <T> T getBean(Class<T> type) {
     return ApplicationContext.getBean(type);
   }
 
@@ -73,7 +73,7 @@ public class TestApplicationServer extends Bolt {
       return this;
     }
     super.withDependencies(modules);
-    // Building the application context here since we might need to get beans before the server is started.
+    // Building the application context here since we might need to getBean beans before the server is started.
     buildApplicationContext();
     contextBuilt = true;
     return this;

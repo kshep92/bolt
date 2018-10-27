@@ -3,11 +3,11 @@ package com.boltframework.utils.httpclient;
 import com.boltframework.utils.Json;
 import com.boltframework.utils.Strings;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
+/**
+ * Class housing common functionality for {@link HttpRequest} and {@link HttpResponse}
+ */
 @SuppressWarnings("WeakerAccess")
 public abstract class HttpEntity {
   HashMap<String, List<String>> headers = new HashMap<>();
@@ -27,13 +27,17 @@ public abstract class HttpEntity {
     this.path = path;
   }
 
-  @SuppressWarnings("WeakerAccess")
   public String getPath() {
     return path;
   }
 
   public HashMap<String, List<String>> getHeaders() {
     return this.headers;
+  }
+
+  public String getHeader(String header) {
+    List<String> headers = getHeaders().get(header);
+    return headers == null || headers.isEmpty() ? null : headers.get(0);
   }
 
   public String getBody() {
@@ -68,11 +72,9 @@ public abstract class HttpEntity {
 
   private String stringifyCookies() {
     if(cookies.isEmpty()) return "[]";
-    StringBuilder builder = new StringBuilder();
-    builder.append("[ ");
-    cookies.forEach((k, v) -> builder.append(v).append(", "));
-    String cookieString = Strings.trimEnd(builder.toString(), 2);
-    return cookieString.concat(" ]");
+    StringJoiner joiner = new StringJoiner(", ", "[", "]");
+    cookies.forEach((k, v) -> joiner.add(v.toString()));
+    return joiner.toString();
   }
 
   public static class Cookie {
@@ -89,8 +91,15 @@ public abstract class HttpEntity {
       return new Cookie(data);
     }
 
-    // admin=true; Max-Age=3000; Expires=Fri, 3 Aug 2018 17:22:32 GMT; Path=/
-    // admin=true; foo=bar
+    /**
+     * Create a cookie from typical browser Cookie header strings.
+     * @param cookieString A browser Cookie header string
+     * @return a map of cookie properties and values
+     *
+     * Cookie strings are typically in the following formats:
+     * - admin=true; Max-Age=3000; Expires=Fri, 3 Aug 2018 17:22:32 GMT; Path=/
+     * - admin=true; foo=bar
+     */
     public static HashMap<String, String> parse(String cookieString) {
       HashMap<String, String> data = new HashMap<>();
       List<String> reservedWords = Arrays.asList("max-age", "path", "expires");

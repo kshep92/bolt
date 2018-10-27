@@ -1,0 +1,24 @@
+3 components:
+- Controller to test
+- An AbstractModule containing dependencies
+- A WebService
+
+class MyTest {
+
+  SomeService service = new Mock(SomeService)
+  MyController controller = new MyController(someService)
+  FakeServer server = new FakeServer() // Or new FakeServer(<Controller>)
+    .forController(<Controller>)
+    .withDependencies(new MockConfiguration())
+    .withMvcConfiguration(<WebService>.class)
+
+  @Before
+  public void setup() {
+    server.setController(controllerInstance)....
+    server.createRequest().then()
+    server.get(<Class>)...
+  }
+
+
+
+}

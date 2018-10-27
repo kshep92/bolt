@@ -1,8 +1,9 @@
 package com.boltframework;
 
+import com.boltframework.config.DefaultConfigurationModule;
 import com.boltframework.data.ConverterRegistry;
 import com.boltframework.data.converters.*;
-import com.boltframework.utils.Env;
+import com.boltframework.config.Env;
 import com.boltframework.web.WebService;
 import com.boltframework.web.routing.PropertiesRegistry;
 import com.boltframework.web.routing.InterceptorBuilder;
@@ -14,12 +15,12 @@ import com.boltframework.web.routing.ResourceHandlerProperties;
 import com.boltframework.web.routing.RouteBuilder;
 import com.boltframework.web.routing.ControllerCollection;
 import com.boltframework.web.routing.RouteProperties;
-import com.google.inject.AbstractModule;
 import com.google.inject.Module;
-import com.google.inject.Provides;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
+import io.vertx.ext.web.Cookie;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
 import org.slf4j.Logger;
@@ -125,6 +126,7 @@ public class Bolt {
     ApplicationContext.initializeWith(configurationModules);
   }
 
+  //TODO: Use classpath scanning to find all controllers
   private void buildRoutes() {
     webService = ApplicationContext.getBean(serviceClass);
     logger.info("Building routes...");
@@ -181,24 +183,6 @@ public class Bolt {
   public Bolt withDependencies(Iterable<Module> modules) {
     modules.forEach(configurationModules::add);
     return this;
-  }
-
-  protected static class DefaultConfigurationModule extends AbstractModule {
-    Vertx vertx;
-
-    @Override
-    protected void configure() {
-      super.configure();
-    }
-
-    @Provides
-    public Vertx getVertx() {
-      return vertx;
-    }
-
-    public void setVertx(Vertx vertx) {
-      this.vertx = vertx;
-    }
   }
 
 }
