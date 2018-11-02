@@ -4,8 +4,6 @@ import com.boltframework.data.Converter;
 import com.boltframework.data.ConverterRegistry;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Utf8;
-import io.vertx.core.MultiMap;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Cookie;

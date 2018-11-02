@@ -124,6 +124,10 @@ public class HttpResponse {
     return this;
   }
 
+  public HttpResponse writeLine(String chunk) {
+    return write(chunk + "\n");
+  }
+
   public void sendFile(String fileName) {
     response.sendFile(fileName);
   }
@@ -145,9 +149,5 @@ public class HttpResponse {
 
   public HttpResponse setStatusCode(HttpResponseStatus status) {
     return setStatusCode(status.code());
-  }
-
-  public HttpResponse writeLine(String chunk) {
-    return write(chunk + "\n");
   }
 }
