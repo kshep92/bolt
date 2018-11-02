@@ -88,6 +88,7 @@ public abstract class HttpEntity {
       HashMap<String, String> data = new HashMap<>();
       data.put("name", name);
       data.put("value", value);
+      data.put("path", "/");
       return new Cookie(data);
     }
 
