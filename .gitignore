@@ -5,4 +5,4 @@ out
 web
 build
 !/src/main/java/com/boltframework/web/
-file-uploads\
+file-uploads
