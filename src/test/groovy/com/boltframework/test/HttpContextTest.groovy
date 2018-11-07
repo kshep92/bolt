@@ -1,48 +1,67 @@
 package com.boltframework.test
 
-import com.google.common.net.MediaType
+import com.boltframework.data.ConverterRegistry
+import com.boltframework.data.converters.LongConverter
+import com.boltframework.test.mocks.MockHttpServerRequest
+import com.boltframework.test.mocks.MockRoutingContext
+import com.boltframework.web.HttpContext
+import io.vertx.core.json.JsonObject
+import io.vertx.ext.web.Cookie
+import io.vertx.ext.web.RoutingContext
+import org.junit.Before
 import org.junit.Test
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import static org.mockito.ArgumentMatchers.anyString
+import static org.mockito.BDDMockito.given
+import static org.mockito.Mockito.mock
+import static org.mockito.Mockito.when
 import static org.junit.Assert.*
 
 class HttpContextTest {
 
-  String Accept = 'text/plain; text/html; application/json'
-  String ContentType = MediaType.FORM_DATA.toString()
+  Logger logger = LoggerFactory.getLogger(getClass())
+  RoutingContext delegate
+  HttpContext context
 
-  @Test
-  void acceptRegexTest() {
-    assertTrue('application/*', accepts('application/*'))
-    assertTrue('*/json', accepts('*/json'))
-    assertTrue('text/*', accepts('text/*'))
-    assertTrue('text/plain', accepts('text/plain'))
-    assertTrue('text/html', accepts('text/html'))
-    assertFalse('application/pdf', accepts('application/pdf'))
+  @Before
+  void setup() {
+    delegate = mock(MockRoutingContext)
+    context = new HttpContext().withDelegate(delegate)
   }
 
   @Test
-  void contentTypeTest() {
-    assertTrue(contentTypeMatches('form'))
-    assertFalse(contentTypeMatches('json'))
-  }
-// Check what the requester will accept
-  Boolean accepts(String contentType) {
-    return Accept.matches(convertToRegex(contentType))
-  }
-
-  // Check the content type of the request
-  Boolean contentTypeMatches(String contentType) {
-    return ContentType.matches(convertToRegex(contentType))
+  void "get body as a particular type"() {
+    MockHttpServerRequest mockRequest = mock(MockHttpServerRequest)
+    given(mockRequest.getHeader(anyString())).willReturn("application/json")
+    given(delegate.request()).willReturn(mockRequest)
+    given(delegate.getBodyAsJson()).willAnswer({ new JsonObject([username: 'user', email: 'user@mail.com']) })
+    assertNotNull(context.getBodyAs(UserForm))
+    assertEquals('user', context.getBodyAs(UserForm).username)
+    assertEquals('user@mail.com', context.getBodyAs(UserForm).email)
   }
 
-  static String convertToRegex(String glob) {
-    if(glob.charAt(0) == '*' as Character)
-      glob = glob.substring(1)
-    if(glob.charAt(glob.length() - 1) == '*' as Character)
-      glob = glob.substring(0, glob.length() - 1)
-    StringBuilder sb = new StringBuilder('*').append(glob).append('*')
-    LoggerFactory.getLogger('HttpContextTest#convertToRegex').debug(sb.toString())
-    return sb.toString().replace('*', ".*")
+  @Test
+  void "get path parameter as a given type"() {
+    ConverterRegistry.add(Long.class, new LongConverter())
+    given(delegate.pathParam("id")).willReturn('1')
+    def param = context.getPathParam('id', Long)
+    assertNotNull(param)
+    assertEquals(new Long(1), param)
+  }
+
+  @Test
+  public void "removing a cookie"() {
+    def cookie = Cookie.cookie("foo", "bar")
+    when(delegate.getCookie(anyString())).thenReturn(cookie)
+    context.removeCookie('foo')
+    assertEquals('/', cookie.path)
+    // No way to get the maxAge property
+  }
+
+  static class UserForm {
+    String username
+    String email
   }
 }

@@ -20,7 +20,7 @@ public class HttpRequest {
   private HttpServerRequest request;
   private Logger logger = LoggerFactory.getLogger(getClass());
 
-  HttpRequest(HttpServerRequest request) {
+  public HttpRequest(HttpServerRequest request) {
     this.request = request;
   }
 
