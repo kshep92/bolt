@@ -39,7 +39,7 @@ class HttpContextTest {
   static String convertToRegex(String glob) {
     if(glob.charAt(0) == '*' as Character)
       glob = glob.substring(1)
-    if(glob.charAt(glob.length() - 1) == '*')
+    if(glob.charAt(glob.length() - 1) == '*' as Character)
       glob = glob.substring(0, glob.length() - 1)
     StringBuilder sb = new StringBuilder('*').append(glob).append('*')
     LoggerFactory.getLogger('HttpContextTest#convertToRegex').debug(sb.toString())

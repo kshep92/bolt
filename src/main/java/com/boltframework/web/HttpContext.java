@@ -47,6 +47,11 @@ public class HttpContext {
     return this;
   }
 
+  /**
+   * Builder method for setting the delegate
+   * @param context The RoutingContext to delegate to
+   * @return This instance
+   */
   public HttpContext withDelegate(RoutingContext context) {
     this.delegate = context;
     return this;
@@ -56,14 +61,25 @@ public class HttpContext {
     return delegate;
   }
 
+  /**
+   * Add a cookie to the response
+   * @param cookie The cookie to add
+   * @return This instance
+   */
   public HttpContext addCookie(Cookie cookie) {
     delegate.addCookie(cookie);
     return this;
   }
 
+  /**
+   * Add a cookie with a 3600s max-age and a default path of /
+   * @param name The name of the cookie
+   * @param value The cookie value
+   * @return this instance
+   */
   public HttpContext addCookie(String name, String value) {
     try {
-      Cookie cookie = Cookie.cookie(name, URLEncoder.encode(value, "utf-8")).setMaxAge(3600);
+      Cookie cookie = Cookie.cookie(name, URLEncoder.encode(value, "utf-8")).setMaxAge(3600).setPath("/");
       return this.addCookie(cookie);
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
