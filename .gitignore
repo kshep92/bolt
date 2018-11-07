@@ -2,7 +2,5 @@
 .idea
 .vertx
 out
-web
-build
-!/src/main/java/com/boltframework/web/
 file-uploads
+build
