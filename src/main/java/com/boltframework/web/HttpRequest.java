@@ -24,6 +24,11 @@ public class HttpRequest {
     this.request = request;
   }
 
+  public HttpRequest withDelegate(HttpServerRequest httpServerRequest) {
+    request = httpServerRequest;
+    return this;
+  }
+
   public Boolean accepts(String contentType) {
     return request.getHeader("Accept").matches(convertToRegex(contentType));
   }
