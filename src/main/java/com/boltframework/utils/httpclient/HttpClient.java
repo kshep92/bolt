@@ -1,6 +1,5 @@
 package com.boltframework.utils.httpclient;
 
-import com.boltframework.utils.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +8,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
