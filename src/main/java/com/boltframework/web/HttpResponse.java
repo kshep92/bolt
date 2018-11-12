@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.ext.web.RoutingContext;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 
@@ -13,7 +12,7 @@ public class HttpResponse {
   private HttpServerResponse response;
   private ObjectMapper mapper;
 
-  HttpResponse(HttpServerResponse response,
+  public HttpResponse(HttpServerResponse response,
                ObjectMapper mapper) {
     this.response = response;
     this.mapper = mapper;
@@ -56,6 +55,10 @@ public class HttpResponse {
 
   public void forbidden(String body) {
     forbidden().send(body);
+  }
+
+  public int getStatusCode() {
+    return response.getStatusCode();
   }
 
   public void html(String htmlString) {
