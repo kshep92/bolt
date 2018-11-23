@@ -10,7 +10,7 @@ import java.io.Writer;
 import java.util.Map;
 
 /**
- * A TemplateEngine implementation using the Freemarker template engine. Used by default.
+ * The default TemplateEngine implementation for Bolt -- Freemarker.
  */
 public class FreemarkerTemplateEngine extends TemplateEngine {
   private Configuration configuration;
@@ -26,7 +26,7 @@ public class FreemarkerTemplateEngine extends TemplateEngine {
   @Override
   public String render(String template, Map<String, Object> data) {
     try {
-      String templateName = template.matches(".*(\\."+defaultExtension+")$") ? template : template + defaultExtension;
+      String templateName = getTemplateName(template);
       Template _template = configuration.getTemplate(templateName);
       Writer out = new StringWriter();
       _template.process(data, out);

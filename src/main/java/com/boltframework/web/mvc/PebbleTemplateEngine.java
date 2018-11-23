@@ -10,7 +10,7 @@ import java.io.Writer;
 import java.util.Map;
 
 /**
- * The default TemplateEngine implementation for Bolt -- Pebble.
+ * Will probably replace the Freemarker engine soon. It's supports template inheritance and is extendable.
  */
 public class PebbleTemplateEngine extends TemplateEngine {
 
