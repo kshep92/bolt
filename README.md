@@ -28,19 +28,46 @@ Bolt was created to allow for rapid development of well-architected and easily t
 
 ## Getting Started
 
-Since Bolt is in super, pre-alpha early development, the best way to use Bolt in your project is via a Gradle include. Copy it to a folder on your PC then augment your project's `settings.gradle` file as follows:
+Since Bolt is in super, pre-alpha early development, the best way to use Bolt in your project is via cloning the repository then doing a Gradle include or installing it into your local Maven repository. 
+
+### Installing to local Maven repository
+
+```
+git clone https://github.com/kshep92/bolt.git
+cd bolt
+./gradlew install
+```
 
 ```groovy
+/* build.gradle */
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    compile "com.reviselabs:boltframework:0.1.0"
+}
+```
+
+### Gradle include
+
+`git clone https://github.com/kshep92/bolt.git`
+
+```groovy
+/* settings.gradle */
+
 rootProject.name = 'myProjectName'
 
 include 'bolt'
 
-project(':bolt').projectDir = "path/to/bolt"
+project(':bolt').projectDir = file("path/to/bolt")
 ```
 
-In your `build.gradle` add Bolt as a compile time dependency:
-
 ```groovy
+/* build.gradle */
+
 dependencies {
     compile project(':bolt')
 }
