@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public abstract class TemplateEngine {
   String templatePath = "www/views";
-  String defaultExtension = ".ftl";
+  String defaultExtension = ".html";
 
   public void setTemplatePath(String templatePath) {
     this.templatePath = templatePath;
