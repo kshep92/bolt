@@ -36,7 +36,7 @@ public class TestApplicationServer extends Bolt {
   }
 
   @Override
-  protected void addRoutes() {
+  protected void addHttpEndpoints() {
     logger.info("Creating HTTP actions...");
     ControllerCollection registry = new ControllerCollection();
     registry.register(controller.getClass(), true);
@@ -68,7 +68,8 @@ public class TestApplicationServer extends Bolt {
     return ApplicationContext.getBean(type);
   }
 
-  public TestApplicationServer withDependencies(DependencyModule dependencies) {
+  @Override
+  public TestApplicationServer withContext(DependencyModule dependencies) {
     if(contextBuilt) {
       logger.error("Context has already been built.");
       return this;

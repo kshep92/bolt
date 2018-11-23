@@ -1,8 +1,8 @@
 package com.boltframework.context;
 
+import com.boltframework.web.mvc.FreemarkerTemplateEngine;
 import com.boltframework.web.mvc.TemplateEngine;
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
 import io.vertx.core.Vertx;
 
 /**
@@ -10,15 +10,19 @@ import io.vertx.core.Vertx;
  * Used in the event the user does not supply their own DependencyModule.
  */
 public class CoreDependencies extends AbstractModule implements DependencyModule {
-  private Vertx vertx;
 
-  @Provides
-  public Vertx getVertx() {
-    return vertx;
+  @Override
+  protected void configure() {
+    bind(TemplateEngine.class).toInstance(templateEngine());
+    bind(Vertx.class).toInstance(vertx());
   }
 
-  public void setVertx(Vertx vertx) {
-    this.vertx = vertx;
+  public Vertx vertx() {
+    return Vertx.vertx();
+  }
+
+  public TemplateEngine templateEngine() {
+    return new FreemarkerTemplateEngine();
   }
 
 }

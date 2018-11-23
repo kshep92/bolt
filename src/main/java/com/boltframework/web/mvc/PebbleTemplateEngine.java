@@ -12,9 +12,9 @@ import java.util.Map;
 /**
  * The default TemplateEngine implementation for Bolt -- Pebble.
  */
-public class PebbleTemplateEngine implements TemplateEngine {
+public class PebbleTemplateEngine extends TemplateEngine {
 
-  private PebbleEngine pebbleEngine = pebbleEngine();
+  private PebbleEngine pebbleEngine;
 
   @Override
   public String render(String template, Map<String, Object> data) {
@@ -29,9 +29,9 @@ public class PebbleTemplateEngine implements TemplateEngine {
     }
   }
 
-  private PebbleEngine pebbleEngine() {
+  public void build() {
     PebbleEngine.Builder builder = new PebbleEngine.Builder();
     // Set properties
-    return builder.build();
+    pebbleEngine = builder.build();
   }
 }

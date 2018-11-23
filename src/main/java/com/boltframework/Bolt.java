@@ -7,6 +7,7 @@ import com.boltframework.data.ConverterRegistry;
 import com.boltframework.data.converters.*;
 import com.boltframework.utils.Env;
 import com.boltframework.web.WebService;
+import com.boltframework.web.mvc.TemplateEngine;
 import com.boltframework.web.routing.PropertiesRegistry;
 import com.boltframework.web.routing.InterceptorBuilder;
 import com.boltframework.web.routing.InterceptorCollection;
@@ -114,14 +115,11 @@ public class Bolt {
   }
 
   protected void buildApplicationContext() {
-    vertx = Vertx.vertx();
-    router = Router.router(vertx);
-    if(dependencyModule == null) {
-      CoreDependencies coreDependencies = new CoreDependencies();
-      coreDependencies.setVertx(vertx);
-      dependencyModule = coreDependencies;
-    }
+    if(dependencyModule == null) dependencyModule = new CoreDependencies();
     ApplicationContext.initializeWith(dependencyModule);
+    ApplicationContext.getBean(TemplateEngine.class).build();
+    vertx = ApplicationContext.getBean(Vertx.class);
+    router = Router.router(vertx);
   }
 
   //TODO: Use classpath scanning to find all controllers
@@ -134,7 +132,7 @@ public class Bolt {
     router.put().handler(bodyHandler);
     router.patch().handler(bodyHandler);
     addInterceptors();
-    addRoutes();
+    addHttpEndpoints();
     addStaticResourceHandlers();
   }
 
@@ -149,7 +147,7 @@ public class Bolt {
   }
 
   //TODO: Experiment with Classpath scanning to gather the controllers
-  protected void addRoutes() {
+  protected void addHttpEndpoints() {
     logger.info("Creating HTTP actions...");
     ControllerCollection registry = new ControllerCollection();
     webService.addControllers(registry);

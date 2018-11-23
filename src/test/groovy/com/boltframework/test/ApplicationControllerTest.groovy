@@ -2,6 +2,9 @@ package com.boltframework.test
 
 import app.TestApplication
 import app.controllers.Application
+import com.boltframework.context.CoreDependencies
+import com.boltframework.web.mvc.PebbleTemplateEngine
+import com.boltframework.web.mvc.TemplateEngine
 import org.junit.AfterClass
 import org.junit.Test
 import org.slf4j.LoggerFactory
@@ -16,7 +19,16 @@ public class ApplicationControllerTest {
 
   protected Logger logger = LoggerFactory.getLogger(getClass())
 
-  public static TestApplicationServer server = new TestApplicationServer(TestApplication)
+  static class MyDependencies extends CoreDependencies {
+
+    @Override
+    TemplateEngine templateEngine() {
+      System.out.println("PEBBLE: Using the Pebble template engine instead of Freemarker")
+      return new PebbleTemplateEngine()
+    }
+  }
+
+  public static TestApplicationServer server = new TestApplicationServer(TestApplication).withContext(new MyDependencies())
 
   static {
     server.setController(new Application())
