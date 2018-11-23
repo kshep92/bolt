@@ -23,6 +23,10 @@ public class FreemarkerTemplateEngine extends TemplateEngine {
     this.configuration = configuration;
   }
 
+  public FreemarkerTemplateEngine() {
+    defaultExtension = ".ftl";
+  }
+
   @Override
   public String render(String template, Map<String, Object> data) {
     try {
