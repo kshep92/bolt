@@ -72,7 +72,7 @@ public class ControllerCollection {
       Annotation route = getRouteAnnotation(method);
       RouteProperties properties = new RouteProperties(requestMappingAnnotation.value()).fromAnnotation(getRouteAnnotation(method));
       properties.setHandler(ctx -> {
-        HttpContext context = new HttpContext().withDelegate(ctx);
+        HttpContext context = ApplicationContext.getBean(HttpContext.class).withDelegate(ctx);
         T controller = (T) ApplicationContext.getController(controllerClass).withHttpContext(context);
         assert controller != null;
         try {

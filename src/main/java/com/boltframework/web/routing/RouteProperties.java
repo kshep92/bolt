@@ -1,5 +1,6 @@
 package com.boltframework.web.routing;
 
+import com.boltframework.context.ApplicationContext;
 import com.boltframework.web.HttpContext;
 import com.boltframework.web.routing.annotations.*;
 import io.vertx.core.http.HttpMethod;
@@ -141,7 +142,7 @@ public class RouteProperties extends AbstractRouteProperties {
   }
 
   public RouteProperties handler(Consumer<HttpContext> handler) {
-    setHandler(ctx -> handler.accept(new HttpContext().withDelegate(ctx)));
+    setHandler(ctx -> handler.accept(ApplicationContext.getBean(HttpContext.class).withDelegate(ctx)));
     return this;
   }
 

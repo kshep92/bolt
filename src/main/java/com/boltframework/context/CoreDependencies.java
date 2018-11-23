@@ -2,8 +2,13 @@ package com.boltframework.context;
 
 import com.boltframework.web.mvc.FreemarkerTemplateEngine;
 import com.boltframework.web.mvc.TemplateEngine;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
+
+import java.text.DateFormat;
 
 /**
  * A concrete class for the basic dependencies each application needs.
@@ -15,6 +20,7 @@ public class CoreDependencies extends AbstractModule implements DependencyModule
   protected void configure() {
     bind(TemplateEngine.class).toInstance(templateEngine());
     bind(Vertx.class).toInstance(vertx());
+    bind(ObjectMapper.class).toInstance(objectMapper());
   }
 
   public Vertx vertx() {
@@ -23,6 +29,11 @@ public class CoreDependencies extends AbstractModule implements DependencyModule
 
   public TemplateEngine templateEngine() {
     return new FreemarkerTemplateEngine();
+  }
+
+  public ObjectMapper objectMapper() {
+    return Json.mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .setDateFormat(DateFormat.getDateInstance(DateFormat.SHORT));
   }
 
 }

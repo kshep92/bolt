@@ -1,6 +1,7 @@
 package com.boltframework.web.routing;
 
 
+import com.boltframework.context.ApplicationContext;
 import com.boltframework.web.HttpContext;
 
 import java.util.function.Consumer;
@@ -8,7 +9,7 @@ import java.util.function.Consumer;
 public class InterceptorProperties extends AbstractRouteProperties {
 
   InterceptorProperties(Consumer<HttpContext> handler) {
-    setHandler(ctx -> handler.accept(new HttpContext().withDelegate(ctx)));
+    setHandler(ctx -> handler.accept(ApplicationContext.getBean(HttpContext.class).withDelegate(ctx)));
   }
 
   public InterceptorProperties consumes(String mimeType) {
