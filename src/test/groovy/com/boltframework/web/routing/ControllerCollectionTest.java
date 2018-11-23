@@ -15,7 +15,7 @@ public class ControllerCollectionTest {
 
   @Test
   public void get() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-    Method method = Application.class.getDeclaredMethod("_get");
+    Method method = Application.class.getDeclaredMethod("index");
     Annotation annotation = method.getAnnotation(Get.class);
     logger.debug("Annotation simple name is: {}, Route value is: {}", annotation.annotationType().getSimpleName(), annotation.annotationType().getMethod("value").invoke(annotation));
     logger.debug(String[].class.getSimpleName());

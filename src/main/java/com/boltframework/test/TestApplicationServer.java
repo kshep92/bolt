@@ -1,8 +1,9 @@
 package com.boltframework.test;
 
-import com.boltframework.ApplicationContext;
+import com.boltframework.context.ApplicationContext;
 import com.boltframework.Bolt;
 import com.boltframework.ReadyState;
+import com.boltframework.context.DependencyModule;
 import com.boltframework.utils.httpclient.HttpClient;
 import com.boltframework.utils.httpclient.HttpRequest;
 import com.boltframework.web.WebService;
@@ -67,12 +68,12 @@ public class TestApplicationServer extends Bolt {
     return ApplicationContext.getBean(type);
   }
 
-  public TestApplicationServer withDependencies(Module... modules) {
+  public TestApplicationServer withDependencies(DependencyModule dependencies) {
     if(contextBuilt) {
       logger.error("Context has already been built.");
       return this;
     }
-    super.withDependencies(modules);
+    super.withContext(dependencies);
     // Building the application context here since we might need to getBean beans before the server is started.
     buildApplicationContext();
     contextBuilt = true;

@@ -1,6 +1,6 @@
 package com.boltframework.web.routing;
 
-import com.boltframework.ApplicationContext;
+import com.boltframework.context.ApplicationContext;
 import com.boltframework.web.HttpContext;
 import com.boltframework.web.mvc.Controller;
 import com.boltframework.web.routing.annotations.*;

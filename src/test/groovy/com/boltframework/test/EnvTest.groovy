@@ -1,6 +1,6 @@
 package com.boltframework.test
 
-import com.boltframework.config.Env
+import com.boltframework.utils.Env
 import org.junit.Test
 
 import static org.junit.Assert.*

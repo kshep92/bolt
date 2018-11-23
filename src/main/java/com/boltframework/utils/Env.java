@@ -1,4 +1,4 @@
-package com.boltframework.config;
+package com.boltframework.utils;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;

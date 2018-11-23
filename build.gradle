@@ -4,8 +4,8 @@ plugins {
   id 'maven'
 }
 
-group 'com.boltframework'
-version '0.0.1'
+group 'com.reviselabs'
+version '0.1.0'
 
 sourceCompatibility = 1.8
 
@@ -22,6 +22,8 @@ dependencies {
   compile group: 'org.hibernate.validator', name: 'hibernate-validator', version: '6.0.10.Final'
   compile group: 'junit', name: 'junit', version: '4.12'
   compile group: 'com.mitchellbosecke', name: 'pebble', version: '2.4.0'
+  // https://mvnrepository.com/artifact/org.freemarker/freemarker
+  compile group: 'org.freemarker', name: 'freemarker', version: '2.3.28'
   compile group: 'io.vertx', name: 'vertx-web', version: '3.5.3'
   compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
   testCompile group: 'org.codehaus.groovy', name: 'groovy', version: '2.5.1'

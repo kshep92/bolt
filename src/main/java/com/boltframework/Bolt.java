@@ -1,9 +1,11 @@
 package com.boltframework;
 
-import com.boltframework.config.DefaultConfigurationModule;
+import com.boltframework.context.ApplicationContext;
+import com.boltframework.context.CoreDependencies;
+import com.boltframework.context.DependencyModule;
 import com.boltframework.data.ConverterRegistry;
 import com.boltframework.data.converters.*;
-import com.boltframework.config.Env;
+import com.boltframework.utils.Env;
 import com.boltframework.web.WebService;
 import com.boltframework.web.routing.PropertiesRegistry;
 import com.boltframework.web.routing.InterceptorBuilder;
@@ -15,20 +17,14 @@ import com.boltframework.web.routing.ResourceHandlerProperties;
 import com.boltframework.web.routing.RouteBuilder;
 import com.boltframework.web.routing.ControllerCollection;
 import com.boltframework.web.routing.RouteProperties;
-import com.google.inject.Module;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
-import io.vertx.ext.web.Cookie;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Consumer;
 
 public class Bolt {
@@ -36,7 +32,7 @@ public class Bolt {
   protected static Logger logger = LoggerFactory.getLogger(Bolt.class);
   private WebService webService;
   private Class<? extends WebService> serviceClass;
-  private Set<Module> configurationModules = new HashSet<>();
+  private DependencyModule dependencyModule;
   private ReadyState readyState;
   private Vertx vertx;
   private Router router;
@@ -120,10 +116,12 @@ public class Bolt {
   protected void buildApplicationContext() {
     vertx = Vertx.vertx();
     router = Router.router(vertx);
-    DefaultConfigurationModule configurationModule = new DefaultConfigurationModule();
-    configurationModule.setVertx(vertx);
-    configurationModules.add(configurationModule);
-    ApplicationContext.initializeWith(configurationModules);
+    if(dependencyModule == null) {
+      CoreDependencies coreDependencies = new CoreDependencies();
+      coreDependencies.setVertx(vertx);
+      dependencyModule = coreDependencies;
+    }
+    ApplicationContext.initializeWith(dependencyModule);
   }
 
   //TODO: Use classpath scanning to find all controllers
@@ -175,13 +173,8 @@ public class Bolt {
     return new Bolt(webServiceClass);
   }
 
-  public Bolt withDependencies(Module... modules) {
-    configurationModules.addAll(Arrays.asList(modules));
-    return this;
-  }
-
-  public Bolt withDependencies(Iterable<Module> modules) {
-    modules.forEach(configurationModules::add);
+  public Bolt withContext(DependencyModule dependencyModule) {
+    this.dependencyModule = dependencyModule;
     return this;
   }
 
