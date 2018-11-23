@@ -3,7 +3,7 @@ package com.boltframework.test;
 import com.boltframework.context.ApplicationContext;
 import com.boltframework.Bolt;
 import com.boltframework.ReadyState;
-import com.boltframework.context.DependencyModule;
+import com.boltframework.context.CoreModule;
 import com.boltframework.utils.httpclient.HttpClient;
 import com.boltframework.utils.httpclient.HttpRequest;
 import com.boltframework.web.WebService;
@@ -12,7 +12,6 @@ import com.boltframework.web.routing.ControllerCollection;
 import com.boltframework.web.routing.PropertiesRegistry;
 import com.boltframework.web.routing.RouteBuilder;
 import com.boltframework.web.routing.RouteProperties;
-import com.google.inject.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +68,7 @@ public class TestApplicationServer extends Bolt {
   }
 
   @Override
-  public TestApplicationServer withContext(DependencyModule dependencies) {
+  public TestApplicationServer withContext(CoreModule dependencies) {
     if(contextBuilt) {
       logger.error("Context has already been built.");
       return this;

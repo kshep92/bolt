@@ -2,7 +2,7 @@ package com.boltframework;
 
 import com.boltframework.context.ApplicationContext;
 import com.boltframework.context.CoreDependencies;
-import com.boltframework.context.DependencyModule;
+import com.boltframework.context.CoreModule;
 import com.boltframework.data.ConverterRegistry;
 import com.boltframework.data.converters.*;
 import com.boltframework.utils.Env;
@@ -33,7 +33,7 @@ public class Bolt {
   protected static Logger logger = LoggerFactory.getLogger(Bolt.class);
   private WebService webService;
   private Class<? extends WebService> serviceClass;
-  private DependencyModule dependencyModule;
+  private CoreModule coreModule;
   private ReadyState readyState;
   private Vertx vertx;
   private Router router;
@@ -115,8 +115,8 @@ public class Bolt {
   }
 
   protected void buildApplicationContext() {
-    if(dependencyModule == null) dependencyModule = new CoreDependencies();
-    ApplicationContext.initializeWith(dependencyModule);
+    if(coreModule == null) coreModule = new CoreDependencies();
+    ApplicationContext.initializeWith(coreModule);
     ApplicationContext.getBean(TemplateEngine.class).build();
     vertx = ApplicationContext.getBean(Vertx.class);
     router = Router.router(vertx);
@@ -126,7 +126,7 @@ public class Bolt {
   private void buildRoutes() {
     webService = ApplicationContext.getBean(serviceClass);
     logger.info("Building routes...");
-    BodyHandler bodyHandler = BodyHandler.create();
+    BodyHandler bodyHandler = coreModule.bodyHandler();
     router.route().handler(CookieHandler.create());
     router.post().handler(bodyHandler);
     router.put().handler(bodyHandler);
@@ -171,8 +171,8 @@ public class Bolt {
     return new Bolt(webServiceClass);
   }
 
-  public Bolt withContext(DependencyModule dependencyModule) {
-    this.dependencyModule = dependencyModule;
+  public Bolt withContext(CoreModule coreModule) {
+    this.coreModule = coreModule;
     return this;
   }
 

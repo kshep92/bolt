@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
+import io.vertx.ext.web.handler.BodyHandler;
 
 import java.text.DateFormat;
 
@@ -14,7 +15,7 @@ import java.text.DateFormat;
  * A concrete class for the basic dependencies each application needs.
  * Used in the event the user does not supply their own DependencyModule.
  */
-public class CoreDependencies extends AbstractModule implements DependencyModule {
+public class CoreDependencies extends AbstractModule implements CoreModule {
 
   @Override
   protected void configure() {
@@ -36,4 +37,7 @@ public class CoreDependencies extends AbstractModule implements DependencyModule
         .setDateFormat(DateFormat.getDateInstance(DateFormat.SHORT));
   }
 
+  public BodyHandler bodyHandler() {
+    return BodyHandler.create();
+  }
 }

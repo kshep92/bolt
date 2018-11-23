@@ -3,7 +3,6 @@ package com.boltframework.context;
 import com.boltframework.web.routing.annotations.RequestMapping;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Module;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -28,8 +27,8 @@ public class ApplicationContext {
     return injector.getInstance(beanClass);
   }
 
-  public static void initializeWith(DependencyModule dependencyModule) {
-    injector = Guice.createInjector(dependencyModule);
+  public static void initializeWith(CoreModule coreModule) {
+    injector = Guice.createInjector(coreModule);
   }
 
   /**
