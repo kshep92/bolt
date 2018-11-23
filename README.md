@@ -8,9 +8,11 @@ Application development in an instant!
 
 - [ ] Create ExceptionHandler logic
 - [ ] WebSocket endpoints
-- [ ] Configurable JSON serialization/deserialization
-- [ ] Configurable body parser (Right now body sizes are limited to 10MB :see_no_evil: )
-- [ ] CORS
+- [x] Configurable JSON serialization/deserialization
+- [x] Configurable body parser (Right now body sizes are limited to 10MB :see_no_evil: )
+- [ ] Allow addition of type converters
+- [ ] Allow classpath loading of templates
+- [x] CORS (Use the Middleware class)
 - [ ] Write more tests!!!!
 - [ ] Complete documentation
 
@@ -102,7 +104,7 @@ Your application will start and can be accessed at http://localhost:3000
 #### A complete application
 
 ```java
-public class MyApplication {
+public class MyApplication extends WebService {
     
     @RequestMapping("/")
     public static class ApplicationCtrl extends Controller {
@@ -113,11 +115,9 @@ public class MyApplication {
         }
     }
     
-    static class MyWebService extends WebService {
-        void addControllers(ControllerRegistry controllers) {
-            controllers.addController(ApplicationCtrl.class);
-        }
-    }
+   public void addControllers(ControllerRegistry controllers) {
+       controllers.addController(ApplicationCtrl.class);
+   }
     
     public static void main(String[] args) {
         Bolt.createService(MyWebService.class).start(1234) // Start on port 1234
@@ -645,11 +645,17 @@ void forbidden(String body);
 /* Send an HTML response */
 void html(String htmlString);
 
+/* Set the content-type of the response to text/html */
+HttpResponse html();
+
 /* Serialize an object to a JSON string and send a JSON response */
 void json(Object entity);
 
 /* Send a JSON response */
 void json(String json);
+
+/* Set the content-type of the response to applicaton/json*/
+HttpResponse json();
 
 /* Set the response status to 404 */
 HttpResponse notFound();
@@ -668,6 +674,12 @@ void redirect(String path);
 
 /* Sends a redirect, but allows you to choose the code */
 void redirect(String path, Integer code);
+
+/* Render a template */
+void render(String templateName)
+
+/* Render a template and send an HTML response */
+void renderHtml(String templateName);
 
 /* Send a response */
 void send(String body);
@@ -846,30 +858,102 @@ public class SignupCtrl extends Controller {
 }
 ```
 
+## Rendering templates
+
+Bolt comes with a barebones implementation of the Freemarker template engine. By default, this template engine looks for templates with a `.ftl` extension in the `www/views` directory.
+
+To render a template, simply call the `render()` or `renderHtml()` method on an `HttpResponse`:
+
+```java
+@Get
+public void index() {
+    response().renderHtml('home.ftl') // Will look for www/views/home.ftl
+}
+```
+
+:memo: Inclusion of the template extension is optional. 
+
+### Passing data to templates
+
+The `HttpContext` class has a mechanism for storing arbitrary data that is accessed via it's `put()` method. Any data stored in the context can be accessed from the template.
+
+```html
+<!-- The template, greet.ftl -->
+<p>
+    Hello, ${name}!
+</p>
+```
+
+```java
+@Get('greet')
+public void greet() {
+    context().put("name", "John").getResponse().renderHtml("greet");
+}
+```
+
 ## Dependency Injection
 
 In our examples thus far we've been instantiating certain class properties using the `new` keyword. This approach is fine for simple example code, but it makes for less testable code overall - not great for production applications.
 
 Bolt encourages the use of [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) to promote code testability, and makes use of the [Guice](https://github.com/google/guice) dependency injection library under the hood for managing application-wide dependencies. 
 
-To begin, create a regular Guice dependency module:
+To begin, create a class that extends `com.boltframework.context.CoreDependencies`:
 
 ```java
-public class MyModule extends AbstractModule {
+public class MyModule extends CoreDependencies {
     
-    @Provides @Singleton
+    @Singleton
     public EntityManagerFactory entityManagerFactory() {
         // Return an instance of EntityManagerFactory
     }
 }
 ```
 
-The above module manages an `EntityManagerFactory` dependency.  To make Bolt aware of this dependency, use the `Bolt#withDependencies` method when creating your Bolt application:
+The above module manages an `EntityManagerFactory` dependency.  To make Bolt aware of this dependency, use the `Bolt#withContext` method when creating your Bolt application:
 
 ```java
 public static void main(String[] args) {
-    Bolt.createService(MyService.class).withDependencies(new MyModule()).start();
+    Bolt.createService(MyService.class).withContext(new MyModule()).start();
 }
+```
+
+### Customizing `CoreDependencies`
+
+With access to the `CoreDependencies` class you can override many of the defaults that come with Bolt such as the template engine and the JSON object mapper. Just override the relevant methods. Below, we see how to change the default file extension for templates on template engine:
+
+```java
+public class MyDeps extends CoreDependencies {
+    
+    @Override
+    public TemplateEngine templateEngine() {
+        return super.templateEngine().defaultExtension(".template");
+    }
+}
+```
+
+While we're on the topic of template engines, you can even use your own custom engine if you desire:
+
+```java
+@Override
+public TemplateEngine templateEngine() {
+    return new MyCustomTemplateEngine();
+}
+```
+
+You can further customize the core defaults by overriding the following methods:
+
+```java
+/* Returns the single instance of Vertx that powers the entire application. */
+Vertx vertx();
+
+/* Returns an instance of the Freemarker template engine by default */
+TemplateEngine templateEngine();
+
+/* Returns an instance of a Jackson ObjectMapper */
+ObjectMapper objectMapper();
+
+/* Return a custom body handler with a different upload directory and other stuff */
+BodyHandler bodyHandler();
 ```
 
 ### Utilizing dependency modules
@@ -995,7 +1079,7 @@ Bolt was designed from the ground up to facilitate easy testing. Controllers in 
 
 Bolt provides an application server that you can use to test your controllers. You can send real HTTP requests to this server with the aid of the `com.boltframework.utils.httpclient.HttpRequest` class. 
 
-The `com.boltframework.test.TestApplicationServer` requires an instance of your controller and can accept an optional Web Service definition and a list of dependency modules.
+The `com.boltframework.test.TestApplicationServer` requires an instance of your controller and can accept an optional Web Service definition and a dependency module.
 
 ### A basic controller test
 
@@ -1047,6 +1131,8 @@ public class TestControllerTest {
 }
 
 ```
+
+If you look at the above code, you'll realize that you don't have to manually start the server. If the server isn't running when you make your first request, it will spin up the server and it will stay running for the duration of all your test cases. Calling `server.stop()` isn't necessary since it will exit after all tests have completed.
 
 And that's how easy it is to create a test for your controller!
 
