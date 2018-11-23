@@ -86,6 +86,12 @@ public class Application extends Controller {
     } catch (InterruptedException ignored) {}
   }
 
+  @Get("template")
+  public void template() {
+    context().put("name", "Kevin");
+    response().ok().renderHtml("index");
+  }
+
   @Route("sendfile")
   public void sendFile() {
     response().sendFile("web/public/index.html");

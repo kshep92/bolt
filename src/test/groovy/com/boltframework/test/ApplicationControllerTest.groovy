@@ -23,8 +23,7 @@ public class ApplicationControllerTest {
 
     @Override
     TemplateEngine templateEngine() {
-      System.out.println("PEBBLE: Using the Pebble template engine instead of Freemarker")
-      return new PebbleTemplateEngine()
+      return super.templateEngine().templatePath('src/test/resources/web/views')
     }
   }
 
@@ -95,6 +94,15 @@ public class ApplicationControllerTest {
     .then({
       assertEquals(200, it.status)
       assertEquals(value, it.body)
+    })
+  }
+
+  @Test
+  public void 'render a template'() {
+    server.createRequest(get('/template')).then({
+      assertEquals('Hello there Kevin', it.body)
+      assertNotNull(it.getHeader('Content-Type'))
+      assertEquals('text/html', it.getHeader('Content-Type'))
     })
   }
 }

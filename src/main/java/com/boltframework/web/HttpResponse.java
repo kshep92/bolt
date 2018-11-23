@@ -1,9 +1,13 @@
 package com.boltframework.web;
 
+import com.boltframework.web.mvc.TemplateEngine;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerResponse;
+
+import java.util.Map;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 
@@ -11,11 +15,23 @@ public class HttpResponse {
 
   private HttpServerResponse response;
   private ObjectMapper mapper;
+  private TemplateEngine templateEngine;
+  private Map<String, Object> contextData;
 
-  public HttpResponse(HttpServerResponse response,
-               ObjectMapper mapper) {
-    this.response = response;
+  @Inject
+  public HttpResponse(ObjectMapper mapper, TemplateEngine templateEngine) {
     this.mapper = mapper;
+    this.templateEngine = templateEngine;
+  }
+
+  HttpResponse withDelegate(HttpServerResponse delegate) {
+    this.response = delegate;
+    return this;
+  }
+
+  HttpResponse withContext(Map<String, Object> contextData) {
+    this.contextData = contextData;
+    return this;
   }
 
   public HttpResponse addHeader(String name, String value) {
@@ -62,19 +78,27 @@ public class HttpResponse {
   }
 
   public void html(String htmlString) {
-    setContentType("text/html").send(htmlString);
+    html().send(htmlString);
+  }
+
+  public HttpResponse html() {
+    return setContentType("text/html");
   }
 
   public void json(Object entity) {
     try {
-      setContentType("application/json").send(mapper.writeValueAsString(entity));
+      json().send(mapper.writeValueAsString(entity));
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
   }
 
   public void json(String json) {
-    setContentType("application/json").send(json);
+    json().send(json);
+  }
+
+  public HttpResponse json() {
+    return setContentType("application/json");
   }
 
   public void notFound(String body) {
@@ -100,6 +124,14 @@ public class HttpResponse {
 
   public void redirect(String path, Integer code) {
     response.setStatusCode(code).putHeader("Location", path).end();
+  }
+
+  public void render(String templateName) {
+    send(templateEngine.render(templateName, contextData));
+  }
+
+  public void renderHtml(String templateName) {
+    html().render(templateName);
   }
 
   public void send(String body) {

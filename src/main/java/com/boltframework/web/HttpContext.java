@@ -1,9 +1,11 @@
 package com.boltframework.web;
 
+import com.boltframework.context.ApplicationContext;
 import com.boltframework.data.Converter;
 import com.boltframework.data.ConverterRegistry;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Cookie;
@@ -17,7 +19,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,10 +28,9 @@ public class HttpContext {
   private ObjectMapper objectMapper;
   private Logger logger = LoggerFactory.getLogger(getClass());
 
-  public HttpContext() {
-    //TODO: Configure the mapper externally and and inject.
-    objectMapper = Json.mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        .setDateFormat(DateFormat.getDateInstance(DateFormat.SHORT));
+  @Inject
+  public HttpContext(ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
   }
 
   /**
@@ -155,7 +155,9 @@ public class HttpContext {
   }
 
   public HttpResponse getResponse() {
-    return new HttpResponse(delegate.response(), objectMapper);
+    return ApplicationContext.getBean(HttpResponse.class)
+        .withDelegate(delegate.response())
+        .withContext(delegate.data());
   }
 
   public void next() {
