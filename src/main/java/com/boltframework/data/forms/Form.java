@@ -26,6 +26,18 @@ public abstract class Form {
     return errors;
   }
 
+  /**
+   * Get the entire result of all validation. Returns a Map of the main error message and any error messages for
+   * form fields
+   * @return A {@link Map} of all the errors on the form.
+   */
+  public Map getValidationResult() {
+    Map<String, Object> errors = new HashMap<>();
+    errors.put("errorMessage", errorMessage);
+    errors.put("errors", this.errors);
+    return errors;
+  }
+
   public String getErrorMessage() {
     return errorMessage;
   }

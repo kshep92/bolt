@@ -1,6 +1,7 @@
 package com.boltframework.test.forms
 
 import com.boltframework.data.forms.Form
+import com.boltframework.utils.Json
 import org.junit.Before
 import org.junit.Test
 import org.slf4j.Logger
@@ -73,6 +74,16 @@ class FormTest {
 
   private String leftPad(Integer number) {
     return String.format('%03d', number)
+  }
+
+  @Test
+  public void 'get validation result'() {
+    form.valid()
+    assertNotNull(form.validationResult)
+    assertNotNull(form.validationResult['errorMessage'])
+    assertNotNull(form.validationResult['errors'])
+    assertEquals(form.errorMessage, form.validationResult['errorMessage'])
+    assertEquals(form.errors.size(), ((Map)form.validationResult['errors']).size())
   }
 
   public class SignupForm extends Form {
