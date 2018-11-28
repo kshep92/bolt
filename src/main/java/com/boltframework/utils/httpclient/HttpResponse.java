@@ -1,5 +1,8 @@
 package com.boltframework.utils.httpclient;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A class that wraps the data returned from a typical {@link java.net.HttpURLConnection} transaction. Used in
  * {@link HttpClient}
@@ -8,6 +11,7 @@ package com.boltframework.utils.httpclient;
 public class HttpResponse extends HttpEntity {
   private Integer status;
   private String url;
+  private Logger logger = LoggerFactory.getLogger(getClass());
 
   public Integer getStatus() {
     return status;
@@ -29,5 +33,9 @@ public class HttpResponse extends HttpEntity {
   public String toString() {
     String template = "# HttpResponse: %s\nStatus=%d\n%s\n";
     return String.format(template, url, status, super.toString());
+  }
+
+  public void printBody() {
+    logger.debug(getBody());
   }
 }
