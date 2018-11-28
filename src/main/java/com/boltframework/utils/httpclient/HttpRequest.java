@@ -24,7 +24,8 @@ public class HttpRequest extends HttpEntity {
   }
 
   public static HttpRequest patch(String path) {
-    return new HttpRequest().method("PATCH").path(path);
+    // Necessary since the HttpURLConnection class doesn't support PATCH methods.
+    return new HttpRequest().method("POST").path(path).header("X-HTTP-METHOD-OVERRIDE", "PATCH");
   }
 
   public static HttpRequest put(String path) {

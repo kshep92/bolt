@@ -6,6 +6,7 @@ import com.boltframework.context.CoreModule;
 import com.boltframework.data.ConverterRegistry;
 import com.boltframework.data.converters.*;
 import com.boltframework.utils.Env;
+import com.boltframework.utils.httpclient.MethodOverrideHandler;
 import com.boltframework.web.WebService;
 import com.boltframework.web.mvc.TemplateEngine;
 import com.boltframework.web.routing.PropertiesRegistry;
@@ -128,7 +129,7 @@ public class Bolt {
     logger.info("Building routes...");
     BodyHandler bodyHandler = coreModule.bodyHandler();
     router.route().handler(CookieHandler.create());
-    router.post().handler(bodyHandler);
+    router.post().handler(new MethodOverrideHandler()).handler(bodyHandler);
     router.put().handler(bodyHandler);
     router.patch().handler(bodyHandler);
     addInterceptors();
