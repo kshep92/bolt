@@ -38,4 +38,20 @@ public class HttpResponse extends HttpEntity {
   public void printBody() {
     logger.debug(getBody());
   }
+
+  public Boolean isOk() {
+    return status >= 200 && status <= 300;
+  }
+
+  public Boolean isBadRequest() {
+    return status == 400;
+  }
+
+  public Boolean isUnauthorized() {
+    return status == 401;
+  }
+
+  public Boolean isError() {
+    return status >= 500;
+  }
 }
