@@ -2,11 +2,10 @@ package com.boltframework.web.mvc;
 
 import com.boltframework.utils.Env;
 import freemarker.template.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.Map;
 
 /**
@@ -14,6 +13,7 @@ import java.util.Map;
  */
 public class FreemarkerTemplateEngine extends TemplateEngine {
   private Configuration configuration;
+  private Logger logger = LoggerFactory.getLogger(getClass());
 
   public Configuration getConfiguration() {
     return configuration;
@@ -57,7 +57,12 @@ public class FreemarkerTemplateEngine extends TemplateEngine {
       configuration.setLogTemplateExceptions(false);
       configuration.setWrapUncheckedExceptions(true);
       this.configuration = configuration;
-    } catch(IOException | TemplateException e) {
+    } catch(FileNotFoundException e) {
+      logger.warn(e.getMessage());
+    } catch(IOException e) {
+      logger.error(e.getMessage());
+    } catch (TemplateException e) {
+      logger.error(e.getMessage());
       e.printStackTrace();
     }
   }
