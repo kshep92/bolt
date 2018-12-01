@@ -97,8 +97,12 @@ public class TestApplicationServer extends Bolt {
 
   @Override
   public void start() {
+    System.setProperty("http.use-overrides", "true");
     if (getServiceClass() == null) setServiceClass(DefaultWebService.class);
-    assert controller != null;
+    if(controller == null) {
+      logger.error("You forgot to set a controller. \uD83D\uDE33");
+      System.exit(1);
+    }
     start(port);
     while (getReadyState() != ReadyState.Running) {
       try {

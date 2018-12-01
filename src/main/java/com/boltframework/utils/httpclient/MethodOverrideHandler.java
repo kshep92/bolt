@@ -13,18 +13,23 @@ import java.util.Map;
  */
 public class MethodOverrideHandler implements Handler<RoutingContext> {
 
-  private Map<String, HttpMethod> nonStandardMethods = new HashMap<>();
+  private String methodToOverride;
+  private Map<String, HttpMethod> httpMethods = new HashMap<>();
 
   {
-    nonStandardMethods.put("patch", HttpMethod.PATCH);
-    nonStandardMethods.put("connect", HttpMethod.CONNECT);
+    httpMethods.put("PATCH", HttpMethod.PATCH);
+    httpMethods.put("CONNECT", HttpMethod.CONNECT);
+  }
+
+  public MethodOverrideHandler(String methodToOverride) {
+    this.methodToOverride = methodToOverride.toUpperCase();
   }
 
   @Override
   public void handle(RoutingContext ctx) {
     String intendedMethod = ctx.request().getHeader("X-HTTP-METHOD-OVERRIDE");
-    if(intendedMethod != null && nonStandardMethods.get(intendedMethod.toLowerCase()) != null) {
-      ctx.reroute(nonStandardMethods.get(intendedMethod.toLowerCase()), ctx.request().path());
+    if(intendedMethod != null && intendedMethod.toUpperCase().matches(methodToOverride)) {
+      ctx.reroute(httpMethods.get(intendedMethod.toUpperCase()), ctx.request().path());
     }
     else ctx.next();
   }

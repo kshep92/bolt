@@ -24,10 +24,13 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
+
+import static io.vertx.core.http.HttpMethod.POST;
 
 public class Bolt {
 
@@ -128,8 +131,14 @@ public class Bolt {
     webService = ApplicationContext.getBean(serviceClass);
     logger.info("Building routes...");
     BodyHandler bodyHandler = coreModule.bodyHandler();
+    Boolean useHttpMethodOverride = Env.getBoolean("http.use-overrides");
+    if(useHttpMethodOverride) {
+      logger.info("[http.use-overrides] Using HTTP method overrides! Slight performance hit ahead.");
+      router.post().handler(new MethodOverrideHandler("PATCH"));
+      router.get().handler(new MethodOverrideHandler("CONNECT"));
+    }
     router.route().handler(CookieHandler.create());
-    router.post().handler(new MethodOverrideHandler()).handler(bodyHandler);
+    router.post().handler(bodyHandler);
     router.put().handler(bodyHandler);
     router.patch().handler(bodyHandler);
     addInterceptors();
