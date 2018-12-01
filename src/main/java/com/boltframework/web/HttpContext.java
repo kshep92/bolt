@@ -96,17 +96,18 @@ public class HttpContext {
 
   public <T> T getBodyAs(Class<T> bodyType) {
     //TODO: Cater for application/x-www-form-url-encoded and multipart/form-data
-    if(!getRequest().contentTypeMatches("json")) return null;
     T result = null;
     try {
+      if(!getRequest().contentTypeMatches("json")) return bodyType.newInstance();
       result = objectMapper.readValue(getBodyAsJson().encode(), bodyType);
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (IOException | InstantiationException | IllegalAccessException e) {
+      getResponse().error(e.getMessage());
     }
     return result;
   }
 
   public JsonObject getBodyAsJson() {
+    if(delegate.getBody().length() == 0) return new JsonObject();
     return delegate.getBodyAsJson();
   }
 

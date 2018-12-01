@@ -34,7 +34,8 @@ public class HttpRequest {
   }
 
   public Boolean contentTypeMatches(String contentType) {
-    return request.getHeader("Content-Type").matches(convertToRegex(contentType));
+    String contentTypeHeader = request.getHeader("Content-Type");
+    return contentTypeHeader != null && contentTypeHeader.matches(convertToRegex(contentType));
   }
 
   public String getAbsoluteUrl() {
