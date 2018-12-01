@@ -19,6 +19,7 @@ public class RouteBuilder extends AbstractRouteBuilder {
     List<Route> routes = new ArrayList<>();
     if(!routeProperties.getPatterns().isEmpty()) {
       for(String pattern: routeProperties.getPatterns()) {
+        logger.debug("Creating route {}", tablulate(routeProperties.getMethod().name(), pattern));
         Route route = router.routeWithRegex(routeProperties.getMethod(), pattern);
         routes.add(route);
       }

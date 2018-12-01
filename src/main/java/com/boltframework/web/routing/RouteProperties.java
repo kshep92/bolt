@@ -103,16 +103,15 @@ public class RouteProperties extends AbstractRouteProperties {
 
   @Override
   protected AbstractRouteProperties addPathRegex(String regex) {
-    getPatterns().add(String.format("/%s%s", prefix, regex));
+    if(regex.startsWith("^/")) regex = regex.replace("^/", "");
+    prefix = prefix.isEmpty() ? "/" : prefix + "/";
+    getPatterns().add(String.format("^%s%s", prefix, regex));
     return this;
   }
 
   @Override
   protected AbstractRouteProperties addPath(@Nonnull String path) {
-    if(path.isEmpty()) path = "/";
-    else {
-      if(!path.startsWith("/")) path = "/" + path;
-    }
+    if(!path.startsWith("/")) path = "/" + path;
     if(path.equals(prefix) && prefix.equals("/")) getPaths().add(path); /* To deal with the root route - prefix: /, path: / */
     else getPaths().add(prefix + path);
     return this;
