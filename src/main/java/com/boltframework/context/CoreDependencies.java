@@ -9,7 +9,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.handler.BodyHandler;
 
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * A concrete class for the basic dependencies each application needs.
@@ -33,8 +33,7 @@ public class CoreDependencies extends AbstractModule implements CoreModule {
   }
 
   public ObjectMapper objectMapper() {
-    return Json.mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        .setDateFormat(DateFormat.getDateInstance(DateFormat.SHORT));
+    return Json.mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
   }
 
   public BodyHandler bodyHandler() {
