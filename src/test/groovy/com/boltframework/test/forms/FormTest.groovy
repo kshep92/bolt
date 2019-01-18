@@ -3,6 +3,7 @@ package com.boltframework.test.forms
 import com.boltframework.data.forms.Form
 import com.boltframework.utils.Json
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,6 +29,8 @@ class FormTest {
     assertFalse(form.errors.isEmpty())
     assertEquals(2, form.errors.size(),)
     logger.debug('{}', form.errors)
+    assertNotNull(form.validationResult['errors']['password'])
+    assertEquals('must not be blank', form.validationResult['errors']['password'])
     logger.debug(form.errorMessage)
   }
 
@@ -61,19 +64,6 @@ class FormTest {
     assertEquals(form.username, account.username)
     assertEquals(form.password, account.password)
     logger.debug('{}', account.createdAt)
-  }
-
-  @Test
-  public void 'string padding'() {
-    // site MPU, Floor G, Location 1..100
-    // MPU-3-001
-    assertEquals('001', leftPad(1))
-    assertEquals('012', leftPad(12))
-    assertEquals('123', leftPad(123))
-  }
-
-  private String leftPad(Integer number) {
-    return String.format('%03d', number)
   }
 
   @Test

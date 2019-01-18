@@ -18,6 +18,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Utility class to handle validation of user submitted data. It also has data transfer functionality.
+ *
+ * @author Kevin Sheppard
+ */
 public abstract class Form {
   private Map<String, String> errors = new HashMap<>();
   private String errorMessage;
@@ -28,8 +33,8 @@ public abstract class Form {
   }
 
   /**
-   * Get the entire result of all validation. Returns a Map of the main error message and any error messages for
-   * form fields
+   * Get the entire result of all validation checks. Returns a Map of the main error message and any error messages for
+   * form fields.
    * @return A {@link Map} of all the errors on the form.
    */
   public Map getValidationResult() {
@@ -43,10 +48,18 @@ public abstract class Form {
     return errorMessage;
   }
 
+  /**
+   * A method that can be overridden to implement custom validation logic. The value returned will be set as the main
+   * error message that {@link #getErrorMessage()} will return.
+   * @return A null value if validation is successful or an error message if not.
+   */
   public String validate() {
     return null;
   }
 
+  /**
+   * Checks annotation based constraints violations.
+   */
   private void checkConstraintValidations() {
     Validator validator = Validation.byProvider(HibernateValidator.class).configure().buildValidatorFactory().getValidator();
     Set<ConstraintViolation<Form>> violations = validator.validate(this);
@@ -57,6 +70,10 @@ public abstract class Form {
     }
   }
 
+  /**
+   * Checks the validity of the data submitted.
+   * @return true if there are no constraint violations and the {@link #validate()} method returns a null String.
+   */
   public Boolean valid() {
     checkConstraintValidations();
     if(!errors.isEmpty()) {
@@ -67,28 +84,69 @@ public abstract class Form {
     return errorMessage == null;
   }
 
+  /**
+   * Copies the properties of the form to an object. It ignores null values by default.
+   * Delegates to {@link #map(Object, Object, Boolean)}
+   * @param target The object to receive this form's values.
+   * @return true if the mapping was successful.
+   */
   public Boolean copyPropertiesTo(Object target) {
-    return map(this, target, true);
+    return map(this, target, false);
   }
 
-  public Boolean copyPropertiesTo(Object target, Boolean ignoreNulls) {
-    return map(this, target, ignoreNulls);
+  /**
+   * Same as {@link #copyPropertiesTo(Object)} but allows the user to pass a flag to include null values.
+   * Delegates to {@link #map(Object, Object, Boolean)}
+   * @param target The object to receive this form's values.
+   * @param includeNulls include null values?
+   * @return true if the mapping was successful.
+   */
+  public Boolean copyPropertiesTo(Object target, Boolean includeNulls) {
+    return map(this, target, includeNulls);
   }
 
+  /**
+   * Copy properties from an object to this form. Ignores null values by default.
+   * Delegates to {@link #map(Object, Object, Boolean)}
+   * @param source The object to copy properties from.
+   * @return true if the mapping was successful.
+   */
   public Boolean copyPropertiesFrom(Object source) {
-    return map(source, this, true);
-  }
-  public Boolean copyPropertiesFrom(Object source, Boolean ignoreNulls) {
-    return map(source, this, ignoreNulls);
+    return map(source, this, false);
   }
 
+  /**
+   * Same as {@link #copyPropertiesFrom(Object)} but with the option to include null values.
+   * Delegates to {@link #map(Object, Object, Boolean)}
+   * @param source The object to copy properties from.
+   * @param includeNulls include null values?
+   * @return true if the mapping was successful.
+   */
+  public Boolean copyPropertiesFrom(Object source, Boolean includeNulls) {
+    return map(source, this, includeNulls);
+  }
+
+  /**
+   * Get an instance of a class from the {@link ApplicationContext}.
+   * @param tClass The class of the instance to create.
+   * @param <T> The return type.
+   * @return An instance of T
+   */
   public <T> T getInstanceOf(Class<T> tClass) {
     T instance = ApplicationContext.getBean(tClass);
-    map(this, instance, true);
+    if(instance != null)
+      map(this, instance, true);
     return instance;
   }
 
-  private Boolean map(Object source, Object target, Boolean ignoreNulls) {
+  /**
+   * The method that copies properties from one object to another.
+   * @param source The object to copy properties from.
+   * @param target The object to copy properties to.
+   * @param includeNulls Include null values?
+   * @return true if the mapping was successful.
+   */
+  private Boolean map(Object source, Object target, Boolean includeNulls) {
     try {
 
       Class sourceCLass = source.getClass();
@@ -125,7 +183,7 @@ public abstract class Form {
           Method readMethod = sourceDescriptor.getReadMethod();
           assert readMethod != null;
           Object value = readMethod.invoke(source);
-          if(value == null && ignoreNulls) continue;
+          if(value == null && !includeNulls) continue;
           writeMethod.invoke(target, value);
         }
       }
