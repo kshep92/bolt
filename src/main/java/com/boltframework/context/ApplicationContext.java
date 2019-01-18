@@ -57,4 +57,8 @@ public class ApplicationContext {
     }
     return controllerClass.cast(managedSingletons.get(className));
   }
+
+  public void injectMemebers(Object instance) {
+    injector.injectMembers(instance);
+  }
 }
