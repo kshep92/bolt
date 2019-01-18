@@ -13,6 +13,8 @@ import static org.junit.Assert.*
 
 /**
  * Toying around with the idea of storing route access rules in a permissions.xml file
+ *
+ * @author Kevin Sheppard
  */
 class PermissionsTest {
 

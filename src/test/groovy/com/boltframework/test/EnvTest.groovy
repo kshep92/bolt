@@ -5,6 +5,11 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
+/**
+ * Test class for Env
+ *
+ * @author Kevin Sheppard
+ */
 class EnvTest {
 
   @Test

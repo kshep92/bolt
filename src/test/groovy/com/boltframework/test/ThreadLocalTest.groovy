@@ -6,6 +6,8 @@ import static org.junit.Assert.assertEquals
 
 /**
  * A test class created to understand the concept of ThreadLocals and how to use them.
+ *
+ * @author Kevin Sheppard
  */
 class ThreadLocalTest {
 
