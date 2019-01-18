@@ -43,6 +43,10 @@ public class HttpResponse extends HttpEntity {
     return status >= 200 && status <= 300;
   }
 
+  public Boolean isRedirect() {
+    return status >= 301 && status <= 307;
+  }
+
   public Boolean isBadRequest() {
     return status == 400;
   }
