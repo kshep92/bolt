@@ -98,9 +98,9 @@ public class HttpContext {
     //TODO: Cater for application/x-www-form-url-encoded and multipart/form-data
     T result = null;
     try {
-      if(!getRequest().contentTypeMatches("json")) return bodyType.newInstance();
+      if(!getRequest().contentTypeMatches("json")) return ApplicationContext.getBean(bodyType);
       result = objectMapper.readValue(getBodyAsJson().encode(), bodyType);
-    } catch (IOException | InstantiationException | IllegalAccessException e) {
+    } catch (IOException e) {
       getResponse().error(e.getMessage());
     }
     return result;

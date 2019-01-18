@@ -1,5 +1,6 @@
 package com.boltframework.data.forms;
 
+import com.boltframework.context.ApplicationContext;
 import org.hibernate.validator.HibernateValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,14 +83,9 @@ public abstract class Form {
   }
 
   public <T> T getInstanceOf(Class<T> tClass) {
-    try {
-      T instance = tClass.newInstance();
-      map(this, instance, true);
-      return instance;
-    } catch (InstantiationException | IllegalAccessException e) {
-      e.printStackTrace();
-      return null;
-    }
+    T instance = ApplicationContext.getBean(tClass);
+    map(this, instance, true);
+    return instance;
   }
 
   private Boolean map(Object source, Object target, Boolean ignoreNulls) {
