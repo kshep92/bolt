@@ -32,20 +32,6 @@ public class HttpContext {
   }
 
   /**
-   * Send a one-off message to the user via a "flash" cookie.
-   * @param message The message to send.
-   * @return the current HttpContext
-   */
-  public HttpContext flash(String message) {
-    try {
-      delegate.addCookie(Cookie.cookie("flash", URLEncoder.encode(message, StandardCharsets.UTF_8.name())).setPath("/").setMaxAge(1));
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-    }
-    return this;
-  }
-
-  /**
    * Builder method for setting the delegate
    * @param context The RoutingContext to delegate to
    * @return This instance
@@ -77,13 +63,26 @@ public class HttpContext {
    */
   public HttpContext addCookie(String name, String value) {
     try {
-      Cookie cookie = Cookie.cookie(name, URLEncoder.encode(value, "utf-8")).setMaxAge(3600).setPath("/");
+      Cookie cookie = Cookie.cookie(name, URLEncoder.encode(value, StandardCharsets.UTF_8.name())).setMaxAge(3600).setPath("/");
       return this.addCookie(cookie);
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
       return null;
     }
+  }
 
+  /**
+   * Send a one-off message to the user via a "flash" cookie.
+   * @param message The message to send.
+   * @return the current HttpContext
+   */
+  public HttpContext flash(String message) {
+    try {
+      delegate.addCookie(Cookie.cookie("flash", URLEncoder.encode(message, StandardCharsets.UTF_8.name())).setPath("/").setMaxAge(1));
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
+    return this;
   }
 
   public void fail(Integer statusCode) {
