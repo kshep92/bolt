@@ -18,8 +18,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
+/**
+ * A wrapper class around {@link RoutingContext} to provide some handy features.
+ */
 public class HttpContext {
 
   private RoutingContext delegate;
@@ -32,9 +36,9 @@ public class HttpContext {
   }
 
   /**
-   * Builder method for setting the delegate
-   * @param context The RoutingContext to delegate to
-   * @return This instance
+   * Builder method for setting the delegate.
+   * @param context The RoutingContext to delegate to.
+   * @return This instance.
    */
   public HttpContext withDelegate(RoutingContext context) {
     this.delegate = context;
@@ -46,9 +50,9 @@ public class HttpContext {
   }
 
   /**
-   * Add a cookie to the response
-   * @param cookie The cookie to add
-   * @return This instance
+   * Add a cookie to the response.
+   * @param cookie The cookie to add.
+   * @return This instance.
    */
   public HttpContext addCookie(Cookie cookie) {
     delegate.addCookie(cookie);
@@ -57,9 +61,9 @@ public class HttpContext {
 
   /**
    * Add a cookie with a 3600s max-age and a default path of /
-   * @param name The name of the cookie
-   * @param value The cookie value
-   * @return this instance
+   * @param name The name of the cookie.
+   * @param value The cookie value.
+   * @return this instance.
    */
   public HttpContext addCookie(String name, String value) {
     try {
@@ -74,7 +78,7 @@ public class HttpContext {
   /**
    * Send a one-off message to the user via a "flash" cookie.
    * @param message The message to send.
-   * @return the current HttpContext
+   * @return the current HttpContext.
    */
   public HttpContext flash(String message) {
     try {
@@ -93,6 +97,12 @@ public class HttpContext {
     return delegate.get(key);
   }
 
+  /**
+   * Get the request body as an instance of a class.
+   * @param bodyType The type of instance to create.
+   * @param <T> The return type.
+   * @return an instance of T.
+   */
   public <T> T getBodyAs(Class<T> bodyType) {
     //TODO: Cater for application/x-www-form-url-encoded and multipart/form-data
     T result = null;
@@ -153,7 +163,7 @@ public class HttpContext {
   }
 
   public HttpResponse getResponse() {
-    return ApplicationContext.getBean(HttpResponse.class)
+    return Objects.requireNonNull(ApplicationContext.getBean(HttpResponse.class))
         .withDelegate(delegate.response())
         .withContext(delegate.data());
   }
@@ -172,6 +182,11 @@ public class HttpContext {
     return this;
   }
 
+  /**
+   * Remove a cookie from the context and the HTTP request/response cycle.
+   * @param name The name of the cookie.
+   * @return this instance.
+   */
   public HttpContext removeCookie(String name) {
     Cookie cookie = delegate.getCookie(name);
     if(cookie == null) return this;

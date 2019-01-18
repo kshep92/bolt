@@ -1,67 +1,54 @@
 package com.boltframework.test
 
+import app.TestApplication
+import app.controllers.HttpContextController
 import com.boltframework.data.ConverterRegistry
-import com.boltframework.data.converters.LongConverter
-import com.boltframework.test.mocks.MockHttpServerRequest
-import com.boltframework.test.mocks.MockRoutingContext
-import com.boltframework.web.HttpContext
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.web.Cookie
-import io.vertx.ext.web.RoutingContext
-import org.junit.Before
+import com.boltframework.utils.Json
 import org.junit.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import static org.mockito.ArgumentMatchers.anyString
-import static org.mockito.BDDMockito.given
-import static org.mockito.Mockito.mock
-import static org.mockito.Mockito.when
 import static org.junit.Assert.*
+import static com.boltframework.utils.httpclient.HttpRequest.*
 
 class HttpContextTest {
 
   Logger logger = LoggerFactory.getLogger(getClass())
-  RoutingContext delegate
-  HttpContext context
+  TestApplicationServer server = new TestApplicationServer(new HttpContextController())
 
-  @Before
-  void setup() {
-    delegate = mock(MockRoutingContext)
-    context = new HttpContext().withDelegate(delegate)
+  @Test
+  public void 'add a cookie and get a cookie'() {
+    server.createRequest(post('context/add-cookie').followRedirects()).then({ res ->
+      assertTrue(res.redirect)
+      assertNotNull(res.cookies['foo'])
+    })
   }
 
   @Test
-  void "get body as a particular type"() {
-    MockHttpServerRequest mockRequest = mock(MockHttpServerRequest)
-    given(mockRequest.getHeader(anyString())).willReturn("application/json")
-    given(delegate.request()).willReturn(mockRequest)
-    given(delegate.getBodyAsJson()).willAnswer({ new JsonObject([username: 'user', email: 'user@mail.com']) })
-    assertNotNull(context.getBodyAs(UserForm))
-    assertEquals('user', context.getBodyAs(UserForm).username)
-    assertEquals('user@mail.com', context.getBodyAs(UserForm).email)
+  public void 'delete a cookie'() {
+    server.createRequest(delete('context/remove-cookie')).then({
+      assertTrue(it.ok)
+      assertNull(it.cookies['foo'])
+    })
   }
 
   @Test
-  void "get path parameter as a given type"() {
-    ConverterRegistry.add(Long.class, new LongConverter())
-    given(delegate.pathParam("id")).willReturn('1')
-    def param = context.getPathParam('id', Long)
-    assertNotNull(param)
-    assertEquals(new Long(1), param)
+  public void 'get body as'() {
+    server.createRequest(post('context/get-body-as').json([username: 'me', password: 'pass'])).then({
+      assertTrue(it.ok)
+      assertNotNull(it.body)
+      def form = Json.parse(it.body, HttpContextController.LoginForm)
+      assertEquals('me', form.username)
+      assertEquals('pass', form.password)
+    })
   }
 
   @Test
-  public void "removing a cookie"() {
-    def cookie = Cookie.cookie("foo", "bar")
-    when(delegate.getCookie(anyString())).thenReturn(cookie)
-    context.removeCookie('foo')
-    assertEquals('/', cookie.path)
-    // No way to get the maxAge property
-  }
-
-  static class UserForm {
-    String username
-    String email
+  public void 'get path param'() {
+    server.createRequest(get('context/get-path-param/10')).then({
+      assertTrue(it.ok)
+      int sum = ConverterRegistry.getConverter(Integer).convert(it.body)
+      assertEquals(20, sum)
+    })
   }
 }

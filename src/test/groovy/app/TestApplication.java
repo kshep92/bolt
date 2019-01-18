@@ -1,14 +1,9 @@
 package app;
 
-import app.controllers.Accounts;
-import app.controllers.Application;
-import app.controllers.Users;
+import app.controllers.HttpContextController;
 import com.boltframework.Bolt;
-import com.boltframework.context.CoreDependencies;
 import com.boltframework.utils.Middleware;
 import com.boltframework.web.WebService;
-import com.boltframework.web.mvc.PebbleTemplateEngine;
-import com.boltframework.web.mvc.TemplateEngine;
 import com.boltframework.web.routing.ControllerCollection;
 import com.boltframework.web.routing.InterceptorCollection;
 import com.boltframework.web.routing.ResourceHandlerCollection;
@@ -19,11 +14,6 @@ public class TestApplication extends WebService {
   @Override
   public void addInterceptors(InterceptorCollection collection) {
     collection.addInterceptor(Middleware.convertVertxHandler(FaviconHandler.create("web/public/favicon.a91f16cf.ico")));
-    collection.addInterceptor(ctx -> ctx.put("permissions", new String[] {"read", "delete"})).addPathRegex("/users/(create|update)");
-    collection.addInterceptor(ctx -> {
-      ctx.addCookie("Name", "Jimmy Trice");
-      ctx.next();
-    }).addPath("/users/*");
   }
 
   @Override
@@ -33,9 +23,7 @@ public class TestApplication extends WebService {
 
   @Override
   public void addControllers(ControllerCollection controllers) {
-    controllers.register(Application.class)
-        .register(Accounts.class)
-        .register(Users.class);
+    controllers.register(HttpContextController.class);
   }
 
   public static void main(String[] args) {
