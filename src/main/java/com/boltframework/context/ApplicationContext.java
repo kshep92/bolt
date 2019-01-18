@@ -3,6 +3,8 @@ package com.boltframework.context;
 import com.boltframework.web.routing.annotations.RequestMapping;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ import java.util.Map;
 public class ApplicationContext {
 
   private static Injector injector;
+  private static Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
 
   /**
    * A Map for storing managed singletons - mainly controllers for now.
@@ -22,6 +25,15 @@ public class ApplicationContext {
   private static Map<String, Object> managedSingletons = new HashMap<>();
 
   public static <T> T getBean(@Nonnull Class<T> beanClass) {
+    if(injector == null) {
+      logger.warn("!!ApplicationContext not initialized!! Will attempt manual instantiation.");
+      try {
+        return beanClass.newInstance();
+      } catch (IllegalAccessException | InstantiationException e) {
+        e.printStackTrace();
+        return null;
+      }
+    }
     if(beanClass.getAnnotation(RequestMapping.class) != null)
       return beanClass.cast(getController(beanClass));
     return injector.getInstance(beanClass);
