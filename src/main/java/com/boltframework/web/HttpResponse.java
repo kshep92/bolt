@@ -118,12 +118,15 @@ public class HttpResponse {
   }
 
   public void redirect(String path) {
-    path = path.matches("^(https?://|/).*") ? path : "/" + path;
-    redirect(path, 303);
+    redirect(formatPath(path), 303);
+  }
+
+  private String formatPath(String path) {
+    return path.matches("^(https?://|/).*") ? path : "/" + path;
   }
 
   public void redirect(String path, Integer code) {
-    response.setStatusCode(code).putHeader("Location", path).end();
+    response.setStatusCode(code).putHeader("Location", formatPath(path)).end();
   }
 
   public void render(String templateName) {
