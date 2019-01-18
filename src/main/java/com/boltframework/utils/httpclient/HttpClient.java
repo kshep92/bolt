@@ -56,10 +56,11 @@ public class HttpClient {
     HttpResponse response = new HttpResponse();
     HttpURLConnection connection;
     try {
-      URL url = new URL(this.url + request.getPath());
+      String target = request.getPath().startsWith("http") ? request.getPath() : this.url + request.getPath();
+      URL url = new URL(target);
       connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod(request.getMethod());
-      connection.setInstanceFollowRedirects(request.getFollowRedirects());
+      connection.setInstanceFollowRedirects(false);
       if(!request.getCookies().isEmpty())
         addCookies(request, connection);
       if(!request.getHeaders().isEmpty())
@@ -70,6 +71,16 @@ public class HttpClient {
       }
       connection.connect();
       int responseCode = connection.getResponseCode();
+      /* Handling redirects */
+      if(responseCode >= 301 && responseCode <= 307 && request.getFollowRedirects()) {
+        String newUrl = connection.getHeaderField("Location");
+        request.method(connection.getRequestMethod())
+            .path(newUrl);
+        request.setHeaders(getHeaders(connection));
+        request.setCookies(getCookies(connection));
+        //TODO: Handle TooManyRedirects if it isn't handled natively
+        sendRequest();
+      }
       InputStream inputStream;
       StringBuilder body = new StringBuilder();
       if(responseCode >= 200 && responseCode < 400) inputStream = connection.getInputStream();
