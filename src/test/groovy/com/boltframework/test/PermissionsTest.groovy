@@ -18,7 +18,7 @@ class PermissionsTest {
 
   @Test
   public void 'read permissions file'() {
-    def file = new File('permissions.xml')
+    def file = new File('src/test/resources/permissions.xml')
     assert file.exists()
     List<Rule> rules = new ArrayList<>()
     DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
